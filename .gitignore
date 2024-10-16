@@ -54,4 +54,4 @@ MANIFEST
 .python-version
 
 .local
-*.env
+qa4sm.env
