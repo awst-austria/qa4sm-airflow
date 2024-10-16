@@ -1,0 +1,4 @@
+apache-airflow==2.9.2
+apache-airflow-providers-docker
+numpy
+pandas

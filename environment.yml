@@ -1,0 +1,10 @@
+# This is for the development environment only (in the end the generated
+# airflow docker image is used in prod.
+name: qa4sm-airflow
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - "-r base_requirements.txt"
