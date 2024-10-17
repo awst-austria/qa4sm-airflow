@@ -55,3 +55,4 @@ MANIFEST
 
 .local
 *.env
+logs/*
