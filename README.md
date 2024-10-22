@@ -9,7 +9,7 @@ This repository contains the configuration to set up the task scheduler for
 2) To start all necessary container, call the `docker-run.sh` script. Starting
    the service should pull the 'latest' available versions of DAG containers 
    (`airflow-dag-XXX` with `pull_policy: always` in `compose.yaml`).
-3) After a few seconds the airflow service should run on port 8080.
+3) After a few seconds the airflow service should run on port 8085 (localhost:8085).
 
 ## Setup
 This setup will build/launch multiple images/containers. See the `compose.yml` setup.

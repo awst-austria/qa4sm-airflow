@@ -12,13 +12,8 @@ setup=$1
 # This contains access tokens and must be added manually
 #source qa4sm.env
 
-if [[ $(hostname) == 'qa4sms1' ]]
-then
-  :  # production setup ...
-else
-  echo "Setting up DEVELOPMENT Setup, User = $setup"
-  export AIRFLOW_USER=$setup
-fi
+echo "Setting up DEVELOPMENT Setup, User = $setup"
+export AIRFLOW_USER=$setup
 
 #if [ `id -u` -ne 0 ]; then
 #  echo "ERROR: Please run this script with sudo (for now)!"
