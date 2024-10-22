@@ -11,19 +11,20 @@ from airflow.models.dag import DAG
 from datetime import datetime, timedelta
 import yaml
 import os
-from datetime import datetime
 import pandas as pd
-import requests
 import logging
+
+from misc import api_update_period, decide_ts_update_required, load_qa4sm_dotenv
 
 # TODO:
 # - Change schedule (not daily)
 
+load_qa4sm_dotenv()
 IMAGE = os.environ["SMOS_DAG_IMAGE"]
 QA4SM_IP_OR_URL = os.environ["QA4SM_IP_OR_URL"]
 QA4SM_PORT_OR_NONE = os.environ["QA4SM_PORT_OR_NONE"]
 QA4SM_API_TOKEN = os.environ["QA4SM_API_TOKEN"]
-QA4SM_DATA_PATH = os.environ["QA4SM_DATA_PATH"]   # On the HOST machine
+QA4SM_DATA_PATH = os.environ["QA4SM_DATA_PATH"]  # On the HOST machine
 
 # Source is on the HOST machine (not airflow container), target is in the worker image
 #   see also https://stackoverflow.com/questions/31381322/docker-in-docker-cannot-mount-volume
@@ -36,13 +37,13 @@ All versions are added to the list. The dag itself can be
 DAG_SETUP = {
     'v700': {
         # Paths here refer to the worker image and should not be changed!
-        'img_path': "/qa4sm/data/SMOS_L2/SMOSL2_V700/images/",
-        'ts_path': "/qa4sm/data/SMOS_L2/SMOSL2_V700/ts_extension/",
-        #'ext_start': "2024-02-21",
-        'ext_start_date': "2024-10-01",  # TODO: CHANGE THIS BACK!!!
+        'img_path': "/qa4sm/data/SMOS_L2/SMOSL2_V700-ext/images/",
+        'ts_path': "/qa4sm/data/SMOS_L2/SMOSL2_V700-ext/timeseries/",
+        'ext_start_date': "2024-02-21",
         'qa4sm_dataset_id': "39",
     },
 }
+
 
 def get_timerange_from_yml(
         img_yml: str = None,
@@ -50,7 +51,6 @@ def get_timerange_from_yml(
         ext_start_date: str = None,
         do_print: bool = False
 ) -> dict:
-
     if (img_yml is None) or (not os.path.isfile(img_yml)):
         logging.info(f"No img yml file: {img_yml}")
         img_to = None
@@ -88,65 +88,14 @@ def get_timerange_from_yml(
             'ts_next': str(ts_next.date())}
 
 
-def decide_ts_update_required(ti=None) -> str:
-    img_to = ti.xcom_pull(task_ids="get_timeranges", key="img_to")
-    ts_to = ti.xcom_pull(task_ids="get_timeranges", key="ts_to")
-    ts_next = ti.xcom_pull(task_ids="get_timeranges", key="ts_next")
-
-    img_to = pd.to_datetime(img_to).to_pydatetime()
-    ts_to = pd.to_datetime(ts_to).to_pydatetime() if ts_to is not None else None
-    ts_next = pd.to_datetime(ts_next).to_pydatetime()
-
-    logging.info(f"Image to: {img_to}")
-    logging.info(f"Ts to: {ts_to}")
-    logging.info(f"Ts Next to: {ts_next}")
-
-    if ts_to is None:
-        if img_to >= ts_next:
-            next = "update_ts"
-        else:
-            next = "finish"
-    else:
-        ts_to = pd.to_datetime(ts_to).to_pydatetime()
-        if img_to > ts_to:
-            next = "update_ts"
-        else:
-            next = "finish"
-
-    logging.info(f"Decision: {next}")
-
-    return next
-
-def _api_update_period(_ds_id, ti=None) -> str:
-    new_ts_to_date: str = ti.xcom_pull("get_new_ts_timerange", key="ts_to")
-    if QA4SM_PORT_OR_NONE.lower() not in ['none', '']:
-        url = f"http://{QA4SM_IP_OR_URL}:{QA4SM_PORT_OR_NONE}/api/update-dataset-version"
-    else:
-        url = QA4SM_IP_OR_URL
-
-    headers = {
-        "Authorization": f"Token {QA4SM_API_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    data = [
-        {
-            "id": str(_ds_id),
-            "time_range_end": str(new_ts_to_date)
-        }
-    ]
-    response = requests.post(url, headers=headers, json=data)
-
-    return str(response)
-
-
 for version, dag_settings in DAG_SETUP.items():
     img_path = dag_settings['img_path']
     ts_path = dag_settings['ts_path']
     ext_start_date = dag_settings['ext_start_date']
     qa4sm_id = dag_settings['qa4sm_dataset_id']
 
-    ts_yml = os.path.join(ts_path, 'overview.yml')
-    img_yml = os.path.join(img_path, 'overview.yml')
+    ts_yml_file = os.path.join(ts_path, 'overview.yml')
+    img_yml_file = os.path.join(img_path, 'overview.yml')
 
     with DAG(
             f"SMOS_L2-{version}-Processing",
@@ -159,12 +108,11 @@ for version, dag_settings in DAG_SETUP.items():
                 "retry_delay": timedelta(minutes=1),
             },
             description="Update SMOS L2 image data",
-            schedule=timedelta(days=1),
+            schedule=timedelta(weeks=1),
             start_date=datetime(2024, 10, 9),
-            catchup=False,   # don't repeat missed runs!
+            catchup=False,  # don't repeat missed runs!
             tags=["smos_l2", "download", "reshuffle", "update"],
     ) as dag:
-
         # Check data setup -----------------------------------------------------
         _task_id = "verify_dir_available"
         _doc = f"""
@@ -212,11 +160,11 @@ for version, dag_settings in DAG_SETUP.items():
             container_name=f'task__smosl2__{version}__{_task_id}',
             privileged=True,
             command=f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
-            f"""smos_l2 update_img {img_path} --username {os.environ['DISSEO_USERNAME']} --password {os.environ['DISSEO_PASSWORD']} || """ \
-            f"""smos_l2 download {img_path} -s {ext_start_date} --username {os.environ['DISSEO_USERNAME']} --password {os.environ['DISSEO_PASSWORD']}'""",
+                    f"""smos_l2 update_img {img_path} --username {os.environ['DISSEO_USERNAME']} --password {os.environ['DISSEO_PASSWORD']} || """ \
+                    f"""smos_l2 download {img_path} -s {ext_start_date} --username {os.environ['DISSEO_USERNAME']} --password {os.environ['DISSEO_PASSWORD']}'""",
             mounts=[data_mount],
             auto_remove="force",
-            timeout=3600*2,
+            timeout=3600 * 2,
             mount_tmp_dir=False,
             doc=_doc,
         )
@@ -229,8 +177,8 @@ for version, dag_settings in DAG_SETUP.items():
         get_timeranges = PythonOperator(
             task_id=_task_id,
             python_callable=get_timerange_from_yml,
-            op_kwargs={'img_yml': img_yml,
-                       'ts_yml': ts_yml,
+            op_kwargs={'img_yml': img_yml_file,
+                       'ts_yml': ts_yml_file,
                        'ext_start_date': ext_start_date,
                        'do_print': True},
             multiple_outputs=True,
@@ -253,7 +201,7 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Optional: Initial extension TS ---------------------------------------
-        _task_id = "update_ts"
+        _task_id = "extend_ts"
         _command = f"""bash -c '[ "$(ls -A {os.path.join(ts_path, '*.nc')})" ] && smos_l2 update_ts {img_path} {ts_path} || """ \
                    f"""smos_l2 reshuffle {img_path} {ts_path} -s {ext_start_date} -m 4'"""
         _doc = f"""
@@ -267,7 +215,7 @@ for version, dag_settings in DAG_SETUP.items():
             command=_command,
             mounts=[data_mount],
             auto_remove="force",
-            timeout=3600*2,
+            timeout=3600 * 2,
             mount_tmp_dir=False,
             doc=_doc,
         )
@@ -281,7 +229,7 @@ for version, dag_settings in DAG_SETUP.items():
         get_new_ts_timerange = PythonOperator(
             task_id=_task_id,
             python_callable=get_timerange_from_yml,
-            op_kwargs={'img_yml': None, 'ts_yml': ts_yml,
+            op_kwargs={'img_yml': None, 'ts_yml': ts_yml_file,
                        'ext_start_date': None, 'do_print': False},
             multiple_outputs=True,
             do_xcom_push=True,
@@ -295,8 +243,11 @@ for version, dag_settings in DAG_SETUP.items():
         """
         update_period = PythonOperator(
             task_id='api_update_period',
-            python_callable=_api_update_period,
-            op_kwargs={'_ds_id': qa4sm_id},
+            python_callable=api_update_period,
+            op_kwargs={'QA4SM_PORT_OR_NONE': QA4SM_PORT_OR_NONE,
+                       'QA4SM_IP_OR_URL': QA4SM_IP_OR_URL,
+                       'QA4SM_API_TOKEN': QA4SM_API_TOKEN,
+                       'ds_id': qa4sm_id},
             doc=_doc,
         )
 
@@ -310,8 +261,8 @@ for version, dag_settings in DAG_SETUP.items():
             task_id=_task_id,
             python_callable=get_timerange_from_yml,
             # trigger_rule='none_failed_min_one_success',
-            op_kwargs={'img_yml': img_yml,
-                       'ts_yml': ts_yml,
+            op_kwargs={'img_yml': img_yml_file,
+                       'ts_yml': ts_yml_file,
                        'ext_start_date': ext_start_date,
                        'do_print': True},
             doc=_doc,
