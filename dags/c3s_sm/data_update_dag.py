@@ -130,13 +130,14 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         _task_id = "verify_qa4sm_reachable"
+        _command = f"(set -e; nc -z -v {QA4SM_IP_OR_URL} {QA4SM_PORT_OR_NONE if QA4SM_PORT_OR_NONE.lower() not in ['none', ''] else 443} 2>&1 | grep -q 'succeeded' && echo 'OK') || exit 1"
         _doc = f"""
         Check if qa4sm is reachable, 0 = success, 1 = fail
         """
         # start container with sudo?
         verify_qa4sm_available = BashOperator(
             task_id=_task_id,
-            bash_command=f"(set -e; nc -z -v {QA4SM_IP_OR_URL} {QA4SM_PORT_OR_NONE} 2>&1 | grep -q 'succeeded' && echo 'OK') || exit 1",
+            bash_command=_command,
             doc=_doc
         )
 
