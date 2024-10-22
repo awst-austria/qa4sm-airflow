@@ -17,7 +17,7 @@ def api_update_period(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN,
     if QA4SM_PORT_OR_NONE.lower() not in ['none', '']:
         url = f"http://{QA4SM_IP_OR_URL}:{QA4SM_PORT_OR_NONE}/api/update-dataset-version"
     else:
-        url = f"http://{QA4SM_IP_OR_URL}/api/update-dataset-version"
+        url = f"https://{QA4SM_IP_OR_URL}/api/update-dataset-version"
 
     headers = {
         "Authorization": f"Token {QA4SM_API_TOKEN}",

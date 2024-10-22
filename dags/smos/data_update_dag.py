@@ -37,8 +37,8 @@ All versions are added to the list. The dag itself can be
 DAG_SETUP = {
     'v700': {
         # Paths here refer to the worker image and should not be changed!
-        'img_path': "/qa4sm/data/SMOS_L2/SMOSL2_V700-ext/images/",
-        'ts_path': "/qa4sm/data/SMOS_L2/SMOSL2_V700-ext/timeseries/",
+        'img_path': "/qa4sm/data/SMOS_L2/SMOSL2_v700-ext/images/",
+        'ts_path': "/qa4sm/data/SMOS_L2/SMOSL2_v700-ext/timeseries/",
         'ext_start_date': "2024-02-21",
         'qa4sm_dataset_id': "39",
     },
