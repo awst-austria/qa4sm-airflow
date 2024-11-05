@@ -2,10 +2,10 @@
 
 docker compose down
 
-docker image rm docker-airflow-worker
-docker image rm docker-airflow-webserver
-docker image rm docker-airflow-triggerer
-docker image rm docker-airflow-scheduler
-docker image rm docker-airflow-init
+docker image rm qa4sm-airflow-airflow-worker
+docker image rm qa4sm-airflow-airflow-webserver
+docker image rm qa4sm-airflow-airflow-triggerer
+docker image rm qa4sm-airflow-airflow-scheduler
+docker image rm qa4sm-airflow-airflow-init
 
 #sudo chown -R $(whoami) .
