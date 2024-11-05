@@ -16,9 +16,6 @@ import logging
 
 from misc import api_update_period, decide_ts_update_required, load_qa4sm_dotenv
 
-# TODO:
-# - Change schedule (not daily)
-
 load_qa4sm_dotenv()
 IMAGE = os.environ["SMOS_DAG_IMAGE"]
 QA4SM_IP_OR_URL = os.environ["QA4SM_IP_OR_URL"]
@@ -105,7 +102,7 @@ for version, dag_settings in DAG_SETUP.items():
                 "email_on_failure": False,
                 "email_on_retry": False,
                 "retries": 1,
-                "retry_delay": timedelta(minutes=1),
+                "retry_delay": timedelta(hours=1),
             },
             description="Update SMOS L2 image data",
             schedule=timedelta(weeks=1),
