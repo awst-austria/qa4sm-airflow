@@ -37,9 +37,9 @@ cat qa4sm.env >> .env
 sudo chmod 777 /var/run/docker.sock
 
 # start all necessary containers
-docker compose up airflow-init
-docker compose up
-docker compose --profile flower up   # port 5555
+docker compose up --detach airflow-init
+docker compose up --detach
+docker compose --profile flower up --detach   # port 5555
 
 if [ ! -e _airflow.sh ]
 then
