@@ -95,7 +95,7 @@ for version, dag_settings in DAG_SETUP.items():
     ts_yml_file = os.path.join(ts_path, 'overview.yml')
 
     with DAG(
-            f"C3S-{version}-Processing",
+            f"Data-Update-{version}",
             default_args={
                 "depends_on_past": False,
                 "email": ["support@qa4sm.eu"],

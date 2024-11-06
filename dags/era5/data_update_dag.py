@@ -98,7 +98,7 @@ for version, dag_settings in DAG_SETUP.items():
     img_yml_file = os.path.join(img_path, 'overview.yml')
 
     with DAG(
-            f"ERA5-{version}-Processing",
+            f"Data-Update-{version}",
             default_args={
                 "depends_on_past": False,
                 "email": ["support@qa4sm.eu"],
@@ -162,7 +162,7 @@ for version, dag_settings in DAG_SETUP.items():
             privileged=True,
             command=f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
                     f"""era5 update_img {img_path} --cds_token {os.environ['CDS_TOKEN']} || """ \
-                    f"""era5 download {img_path} -s {ext_start_date} -v swvl1,swvl2,swvl3,swvl4,stl1,stl2,stl3,stl4 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'""",
+                    f"""era5 download {img_path} -s {ext_start_date} -v swvl1,swvl2,swvl3,stl1,stl2,stl3 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'""",
             mounts=[data_mount],
             auto_remove="force",
             timeout=3600 * 2,
