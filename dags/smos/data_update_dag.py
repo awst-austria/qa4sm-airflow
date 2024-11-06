@@ -95,7 +95,7 @@ for version, dag_settings in DAG_SETUP.items():
     img_yml_file = os.path.join(img_path, 'overview.yml')
 
     with DAG(
-            f"Data-Update-{version}",
+            f"SMOS_L2-{version}-Processing",
             default_args={
                 "depends_on_past": False,
                 "email": ["support@qa4sm.eu"],
