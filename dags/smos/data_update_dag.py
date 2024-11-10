@@ -200,8 +200,9 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Optional: Initial extension TS ---------------------------------------
         _task_id = "extend_ts"
+        VARS = "Soil_Moisture,Science_Flags,Confidence_Flags,Chi_2_P,RFI_Prob,N_RFI_X,N_RFI_Y,M_AVA0"
         _command = f"""bash -c '[ "$(ls -A {os.path.join(ts_path, '*.nc')})" ] && smos_l2 update_ts {img_path} {ts_path} || """ \
-                   f"""smos_l2 reshuffle {img_path} {ts_path} -s {ext_start_date} -m 4'"""
+                   f"""smos_l2 reshuffle {img_path} {ts_path} -s {ext_start_date} -v {VARS} -m 4'"""
         _doc = f"""
         Creates new time series, or appends new data in time series format.
         """
