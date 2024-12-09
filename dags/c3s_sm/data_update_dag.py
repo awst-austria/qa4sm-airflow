@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 import yaml
 import os
-from datetime import datetime
 import pandas as pd
 import logging
 
@@ -23,6 +22,8 @@ QA4SM_IP_OR_URL = os.environ["QA4SM_IP_OR_URL"]
 QA4SM_PORT_OR_NONE = os.environ["QA4SM_PORT_OR_NONE"]
 QA4SM_API_TOKEN = os.environ["QA4SM_API_TOKEN"]
 QA4SM_DATA_PATH = os.environ["QA4SM_DATA_PATH"]  # On the HOST machine
+EMAIL_ON_FAILURE = bool(int(os.environ.get("EMAIL_ON_FAILURE", 0)))
+
 
 # Source is on the HOST machine (not airflow container), target is in the worker image
 #   see also https://stackoverflow.com/questions/31381322/docker-in-docker-cannot-mount-volume
@@ -96,6 +97,7 @@ for version, dag_settings in DAG_SETUP.items():
     ts_path = dag_settings['ts_path']
     ext_start_date = dag_settings['ext_start_date']
     qa4sm_id = dag_settings['qa4sm_dataset_id']
+    email_on_failure = dag_settings['email_on_failure']
 
     img_yml_file = os.path.join(img_path, 'overview.yml')
     ts_yml_file = os.path.join(ts_path, 'overview.yml')
@@ -105,7 +107,7 @@ for version, dag_settings in DAG_SETUP.items():
             default_args={
                 "depends_on_past": False,
                 "email": ["support@qa4sm.eu"],
-                "email_on_failure": False,
+                "email_on_failure": EMAIL_ON_FAILURE,
                 "email_on_retry": False,
                 "retries": 1,
                 "retry_delay": timedelta(hours=1),
@@ -178,11 +180,11 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Get current time series coverage -------------------------------------
-        _task_id = "get_timeranges"
+        _task_id = "get_img_timeranges"
         _doc = f"""
         Look at time series and image data and infer their covered period.
         """
-        get_timeranges = PythonOperator(
+        get_img_timeranges = PythonOperator(
             task_id=_task_id,
             python_callable=get_timeranges_from_yml,
             op_kwargs={'img_yml': img_yml_file,
@@ -199,7 +201,7 @@ for version, dag_settings in DAG_SETUP.items():
         _doc = f"""
         Compare image period and time series period and decide if update needed.
         """
-        decide_reshuffle = BranchPythonOperator(
+        decide_ts_update = BranchPythonOperator(
             task_id=_task_id,
             python_callable=decide_ts_update_required,
             doc=_doc,
@@ -245,6 +247,7 @@ for version, dag_settings in DAG_SETUP.items():
                        'do_print': False},
             multiple_outputs=True,
             do_xcom_push=True,
+            trigger_rule="none_failed_min_one_success",
             doc=_doc,
         )
 
@@ -272,14 +275,14 @@ for version, dag_settings in DAG_SETUP.items():
         finish = PythonOperator(
             task_id=_task_id,
             python_callable=get_timeranges_from_yml,
-            # trigger_rule='none_failed_min_one_success',
             op_kwargs={'img_yml': img_yml_file,
                        'ts_yml': ts_yml_file,
                        'ext_start': ext_start_date,
                        'do_print': True},
         )
 
-        # Task logic ----------------------------------------------------------
-        verify_dir_available >> verify_qa4sm_available >> update_images >> get_timeranges >> decide_reshuffle
-        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> finish
-        decide_reshuffle >> get_ts_timerange >> update_period >> finish
+        # Task Logic
+        verify_dir_available >> verify_qa4sm_available >> update_images >> get_img_timeranges >> decide_ts_update
+        decide_ts_update >> extend_ts >> get_ts_timerange >> update_period >> finish
+        decide_ts_update >> get_ts_timerange >> update_period >> finish
+
