@@ -13,7 +13,7 @@ def load_qa4sm_dotenv():
 
 def api_update_period(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN,
                       ds_id, ti=None) -> str:
-    new_ts_to_date: str = ti.xcom_pull("get_new_ts_timerange", key="ts_to")
+    new_ts_to_date: str = ti.xcom_pull("get_ts_timerange", key="ts_to")
     if QA4SM_PORT_OR_NONE.lower() not in ['none', '']:
         url = f"http://{QA4SM_IP_OR_URL}:{QA4SM_PORT_OR_NONE}/api/update-dataset-version"
     else:
