@@ -39,6 +39,12 @@ DAG_SETUP = {
         'ext_start_date': "2022-01-01",
         'qa4sm_dataset_id': "45",
     },
+    'v202312': {
+        'img_path': "/qa4sm/data/C3S_combined/C3S_V202312-ext/images/",
+        'ts_path': "/qa4sm/data/C3S_combined/C3S_V202312-ext/timeseries/",
+        'ext_start_date': "2024-01-01",
+        'qa4sm_dataset_id': "58",
+    },
 }
 
 
@@ -106,16 +112,17 @@ for version, dag_settings in DAG_SETUP.items():
             },
             description="Update C3S SM image data",
             schedule=timedelta(weeks=1),
-            start_date=datetime(2024, 7, 11),
-            catchup=False,
+            start_date=datetime(2024, 12, 2),
+            catchup=False,  # avoid duplicate processing
             tags=["c3s_sm", "download"],
     ) as dag:
         # Check data setup -----------------------------------------------------
         _task_id = "verify_dir_available"
+        _command = bash_command = f"bash -c '[ -d \"{img_path}\" ] && [ -d \"{ts_path}\" ] || exit 1'"
         _doc = f"""
         Check if the data store is mounted, chck if {img_path} and {ts_path} exist.
         """
-        _command = bash_command = f"bash -c '[ -d \"{img_path}\" ] && [ -d \"{ts_path}\" ] || exit 1'"
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         # start container with sudo?
         verify_dir_available = DockerOperator(
             task_id=_task_id,
@@ -124,6 +131,7 @@ for version, dag_settings in DAG_SETUP.items():
             privileged=True,
             command=_command,
             mounts=[data_mount],
+            force_pull=True,  # make sure the image is pulled once the start of the pipeline
             auto_remove="force",
             mount_tmp_dir=False,
             doc=_doc
@@ -134,6 +142,7 @@ for version, dag_settings in DAG_SETUP.items():
         _doc = f"""
         Check if qa4sm is reachable, 0 = success, 1 = fail
         """
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         # start container with sudo?
         verify_qa4sm_available = BashOperator(
             task_id=_task_id,
@@ -143,6 +152,9 @@ for version, dag_settings in DAG_SETUP.items():
 
         # CDS Image Download----------------------------------------------------
         _task_id = f'update_images'
+        _command = f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
+                   f"""c3s_sm update_img {img_path} --cds_token {os.environ['CDS_TOKEN']} || """ \
+                   f"""c3s_sm download {img_path} -s {ext_start_date} -v {version} -p combined --freq daily --cds_token {os.environ['CDS_TOKEN']}'"""
         _doc = f"""
         This task will check if there is new data available online, and if 
         there is any data that matches to the one found locally, download new 
@@ -150,15 +162,14 @@ for version, dag_settings in DAG_SETUP.items():
         This will not replace any existing files locally. This finds the LATEST 
         local file and checks if any new data AFTER this date is available.
         """
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         # https://airflow.apache.org/docs/apache-airflow-providers-docker/stable/_api/airflow/providers/docker/operators/docker/index.html
         update_images = DockerOperator(
             task_id=_task_id,
             image=IMAGE,
             container_name=f'task__c3s_sm__{_task_id}_{version}',
             privileged=True,
-            command=f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
-                    f"""c3s_sm update_img {img_path} --cds_token {os.environ['CDS_TOKEN']} || """ \
-                    f"""c3s_sm download {img_path} -s {ext_start_date} -v {version} -p combined --freq daily --cds_token {os.environ['CDS_TOKEN']}'""",
+            command=_command,
             mounts=[data_mount],
             auto_remove="force",
             timeout=3600 * 2,
@@ -206,6 +217,7 @@ for version, dag_settings in DAG_SETUP.items():
         series. If a file is currently being used, repurpose will try until it 
         can append to it.
         """
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         extend_ts = DockerOperator(
             task_id=_task_id,
             image=IMAGE,
@@ -222,8 +234,7 @@ for version, dag_settings in DAG_SETUP.items():
         # Optional: Get updated time range -------------------------------------
         _task_id = "get_new_ts_timerange"
         _doc = f"""
-        Only runs when an update was performed. Get the new time range of the 
-        time series after they were updated.
+        Get the current temporal coverage of the time series data
         """
         get_new_ts_timerange = PythonOperator(
             task_id=_task_id,
@@ -239,8 +250,8 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Optional: Send new time range to QA4SM -------------------------------
         _doc = f"""
-        After the time series is updated, use the NEW time range information
-        to update the qa4sm database for the dataset.
+        Report the latest covered period to the service to update it on the 
+        website.
         """
         update_period = PythonOperator(
             task_id='api_update_period',
@@ -255,8 +266,8 @@ for version, dag_settings in DAG_SETUP.items():
         # Always check the current time range again ----------------------------
         _task_id = "finish"
         _doc = f""" 
-        Print the current coverages again (either after update or not).
-        This is just a wrap-up task that ALWAYS runs.
+        Print the current coverages again. This is just a wrap-up task that 
+        ALWAYS runs.
         """
         finish = PythonOperator(
             task_id=_task_id,
@@ -271,4 +282,4 @@ for version, dag_settings in DAG_SETUP.items():
         # Task logic ----------------------------------------------------------
         verify_dir_available >> verify_qa4sm_available >> update_images >> get_timeranges >> decide_reshuffle
         decide_reshuffle >> extend_ts >> get_new_ts_timerange >> update_period >> finish
-        decide_reshuffle >> finish
+        decide_reshuffle >> get_new_ts_timerange >> update_period >> finish

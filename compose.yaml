@@ -287,7 +287,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  # Any images used in DAGs should be added here
+  # Any images used in DAGs should be added here, to verify they exist upons starting airflow
   airflow-dag-c3s:
     image: ${C3S_SM_DAG_IMAGE}
     pull_policy: always  #  images are pulled when launching the service.
