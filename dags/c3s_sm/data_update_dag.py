@@ -97,7 +97,6 @@ for version, dag_settings in DAG_SETUP.items():
     ts_path = dag_settings['ts_path']
     ext_start_date = dag_settings['ext_start_date']
     qa4sm_id = dag_settings['qa4sm_dataset_id']
-    email_on_failure = dag_settings['email_on_failure']
 
     img_yml_file = os.path.join(img_path, 'overview.yml')
     ts_yml_file = os.path.join(ts_path, 'overview.yml')
