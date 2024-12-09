@@ -32,10 +32,10 @@ All versions are added to the list. The dag itself can be
 (de)activated in the GUI afterwards
 """
 DAG_SETUP = {
-    'ERA5_LAND_V20190904-ext': {
+    'ERA5_LAND_latest-ext': {
         # Paths here refer to the worker image and should not be changed!
-        'img_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_V20190904-ext/images/",
-        'ts_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_V20190904-ext/timeseries/",
+        'img_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_latest-ext/images/",
+        'ts_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_latest-ext/timeseries/",
         'ext_start_date': "2023-01-01",
         'qa4sm_dataset_id': "16",
     },
@@ -107,7 +107,7 @@ for version, dag_settings in DAG_SETUP.items():
             description="Update ERA image data",
             schedule=timedelta(weeks=1),
             start_date=datetime(2024, 10, 28),
-            catchup=False,  # don't repeat missed runs!
+            catchup=False,  # avoid duplicate processing
             tags=["era", "download", "reshuffle", "update"],
     ) as dag:
         #Check data setup -----------------------------------------------------
@@ -125,6 +125,7 @@ for version, dag_settings in DAG_SETUP.items():
             privileged=True,
             command=_command,
             mounts=[data_mount],
+            force_pull=True,  # make sure the image is pulled once the start of the pipeline
             auto_remove="force",
             mount_tmp_dir=False,
             doc=_doc

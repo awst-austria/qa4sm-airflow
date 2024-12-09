@@ -128,6 +128,7 @@ for version, dag_settings in DAG_SETUP.items():
             privileged=True,
             command=_command,
             mounts=[data_mount],
+            force_pull=True,  # make sure the image is pulled once the start of the pipeline
             auto_remove="force",
             mount_tmp_dir=False,
             doc=_doc

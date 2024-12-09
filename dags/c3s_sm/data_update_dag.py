@@ -113,7 +113,7 @@ for version, dag_settings in DAG_SETUP.items():
             description="Update C3S SM image data",
             schedule=timedelta(weeks=1),
             start_date=datetime(2024, 12, 2),
-            catchup=False,
+            catchup=False,  # avoid duplicate processing
             tags=["c3s_sm", "download"],
     ) as dag:
         # Check data setup -----------------------------------------------------
@@ -131,6 +131,7 @@ for version, dag_settings in DAG_SETUP.items():
             privileged=True,
             command=_command,
             mounts=[data_mount],
+            force_pull=True,  # make sure the image is pulled once the start of the pipeline
             auto_remove="force",
             mount_tmp_dir=False,
             doc=_doc

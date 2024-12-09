@@ -80,9 +80,11 @@ def get_timerange_from_yml(
         print("TS time to: ", ts_to)
         print("Ts next: ", ts_next)
 
-    return {'img_to': str(img_to.date() if img_to is not None else None),
-            'ts_to': str(ts_to.date()) if ts_to is not None else None,
-            'ts_next': str(ts_next.date())}
+    return {
+        'img_to': str(img_to.date() if img_to is not None else None),
+        'ts_to': str(ts_to.date()) if ts_to is not None else None,
+        'ts_next': str(ts_next.date())
+    }
 
 
 for version, dag_settings in DAG_SETUP.items():
@@ -98,6 +100,7 @@ for version, dag_settings in DAG_SETUP.items():
             f"SMOS_L2-{version}-Processing",
             default_args={
                 "depends_on_past": False,
+                "catchup": False,
                 "email": ["support@qa4sm.eu"],
                 "email_on_failure": False,
                 "email_on_retry": False,
@@ -107,7 +110,7 @@ for version, dag_settings in DAG_SETUP.items():
             description="Update SMOS L2 image data",
             schedule=timedelta(weeks=1),
             start_date=datetime(2024, 10, 9),
-            catchup=False,  # don't repeat missed runs!
+            catchup=False,  # avoid duplicate processing
             tags=["smos_l2", "download", "reshuffle", "update"],
     ) as dag:
         # Check data setup -----------------------------------------------------
@@ -125,7 +128,8 @@ for version, dag_settings in DAG_SETUP.items():
             privileged=True,
             command=_command,
             mounts=[data_mount],
-            auto_remove="force",
+            force_pull=True,  # make sure the image is pulled once the start of the pipeline
+            auto_remove="force",  # The container can still be removed, image is kept
             mount_tmp_dir=False,
             doc=_doc
         )
