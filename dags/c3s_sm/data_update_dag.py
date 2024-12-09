@@ -2,6 +2,7 @@ from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.docker.operators.docker import DockerOperator, Mount
 from airflow.models.dag import DAG
+from airflow.models.baseoperator import chain
 from datetime import datetime, timedelta
 
 import yaml
@@ -178,11 +179,11 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Get current time series coverage -------------------------------------
-        _task_id = "get_timeranges"
+        _task_id = "get_img_timeranges"
         _doc = f"""
         Look at time series and image data and infer their covered period.
         """
-        get_timeranges = PythonOperator(
+        get_img_timeranges = PythonOperator(
             task_id=_task_id,
             python_callable=get_timeranges_from_yml,
             op_kwargs={'img_yml': img_yml_file,
@@ -199,7 +200,7 @@ for version, dag_settings in DAG_SETUP.items():
         _doc = f"""
         Compare image period and time series period and decide if update needed.
         """
-        decide_reshuffle = BranchPythonOperator(
+        decide_ts_update = BranchPythonOperator(
             task_id=_task_id,
             python_callable=decide_ts_update_required,
             doc=_doc,
@@ -245,6 +246,7 @@ for version, dag_settings in DAG_SETUP.items():
                        'do_print': False},
             multiple_outputs=True,
             do_xcom_push=True,
+            trigger_rule="none_failed_min_one_success",
             doc=_doc,
         )
 
@@ -272,14 +274,14 @@ for version, dag_settings in DAG_SETUP.items():
         finish = PythonOperator(
             task_id=_task_id,
             python_callable=get_timeranges_from_yml,
-            # trigger_rule='none_failed_min_one_success',
             op_kwargs={'img_yml': img_yml_file,
                        'ts_yml': ts_yml_file,
                        'ext_start': ext_start_date,
                        'do_print': True},
         )
 
-        # Task logic ----------------------------------------------------------
-        verify_dir_available >> verify_qa4sm_available >> update_images >> get_timeranges >> decide_reshuffle
-        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> finish
-        decide_reshuffle >> get_ts_timerange >> update_period >> finish
+        # Task Logic
+        verify_dir_available >> verify_qa4sm_available >> update_images >> get_img_timeranges >> decide_ts_update
+        decide_ts_update >> extend_ts >> get_ts_timerange >> update_period >> finish
+        decide_ts_update >> get_ts_timerange >> update_period >> finish
+

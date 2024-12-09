@@ -174,11 +174,11 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Get current time series coverage -------------------------------------
-        _task_id = "get_timeranges"
+        _task_id = "get_img_timeranges"
         _doc = f"""
         Look at time series and image data and infer their covered period.
         """
-        get_timeranges = PythonOperator(
+        get_img_timeranges = PythonOperator(
             task_id=_task_id,
             python_callable=get_timerange_from_yml,
             op_kwargs={'img_yml': img_yml_file,
@@ -236,6 +236,7 @@ for version, dag_settings in DAG_SETUP.items():
             op_kwargs={'img_yml': None, 'ts_yml': ts_yml_file,
                        'ext_start_date': None, 'do_print': False},
             multiple_outputs=True,
+            trigger_rule="none_failed_min_one_success",
             do_xcom_push=True,
             doc=_doc,
         )
@@ -273,6 +274,6 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Task logic -----------------------------------------------------------
-        verify_dir_available >> verify_qa4sm_available >> update_images >> get_timeranges >> decide_reshuffle
+        verify_dir_available >> verify_qa4sm_available >> update_images >> get_img_timeranges >> decide_reshuffle
         decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> finish
         decide_reshuffle >> get_ts_timerange >> update_period >> finish

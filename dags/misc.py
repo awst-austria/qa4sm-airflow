@@ -35,9 +35,9 @@ def api_update_period(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN,
 
 
 def decide_ts_update_required(ti=None) -> str:
-    img_to = ti.xcom_pull(task_ids="get_timeranges", key="img_to")
-    ts_to = ti.xcom_pull(task_ids="get_timeranges", key="ts_to")
-    ts_next = ti.xcom_pull(task_ids="get_timeranges", key="ts_next")
+    img_to = ti.xcom_pull(task_ids="get_img_timeranges", key="img_to")
+    ts_to = ti.xcom_pull(task_ids="get_img_timeranges", key="ts_to")
+    ts_next = ti.xcom_pull(task_ids="get_img_timeranges", key="ts_next")
 
     img_to = pd.to_datetime(img_to).to_pydatetime()
     ts_to = pd.to_datetime(ts_to).to_pydatetime() if ts_to is not None else None
@@ -49,16 +49,16 @@ def decide_ts_update_required(ti=None) -> str:
 
     if ts_to is None:
         if img_to >= ts_next:
-            next = "extend_ts"
+            update = "extend_ts"
         else:
-            next = "get_ts_timerange"
+            update = "get_ts_timerange"
     else:
         ts_to = pd.to_datetime(ts_to).to_pydatetime()
         if img_to > ts_to:
-            next = "extend_ts"
+            update = "extend_ts"
         else:
-            next = "get_ts_timerange"
+            update = "get_ts_timerange"
 
-    logging.info(f"Decision: {next}")
+    logging.info(f"Decision to update: {update}")
 
-    return next
+    return update
