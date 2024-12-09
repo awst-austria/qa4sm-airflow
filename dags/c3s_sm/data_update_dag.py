@@ -232,11 +232,11 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Optional: Get updated time range -------------------------------------
-        _task_id = "get_new_ts_timerange"
+        _task_id = "get_ts_timerange"
         _doc = f"""
         Get the current temporal coverage of the time series data
         """
-        get_new_ts_timerange = PythonOperator(
+        get_ts_timerange = PythonOperator(
             task_id=_task_id,
             python_callable=get_timeranges_from_yml,
             op_kwargs={'img_yml': None,
@@ -281,5 +281,5 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Task logic ----------------------------------------------------------
         verify_dir_available >> verify_qa4sm_available >> update_images >> get_timeranges >> decide_reshuffle
-        decide_reshuffle >> extend_ts >> get_new_ts_timerange >> update_period >> finish
-        decide_reshuffle >> get_new_ts_timerange >> update_period >> finish
+        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> finish
+        decide_reshuffle >> get_ts_timerange >> update_period >> finish
