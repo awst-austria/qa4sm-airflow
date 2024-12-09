@@ -197,8 +197,8 @@ for version, dag_settings in DAG_SETUP.items():
         _doc = f"""
         Compare image period and time series period and decide if update needed.
         This can result in
-        - 'finish': No processing required
-        - 'update_ts': If extensions exist, update them
+        - 'get_ts_timerange': No processing required, verify period
+        - 'extend_ts': If extensions exist, update them
         """
         decide_reshuffle = BranchPythonOperator(
             task_id=_task_id,
@@ -228,11 +228,11 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Optional: Get updated time range -------------------------------------
-        _task_id = "get_new_ts_timerange"
+        _task_id = "get_ts_timerange"
         _doc = f"""
         Get the current temporal coverage of the time series data
         """
-        get_new_ts_timerange = PythonOperator(
+        get_ts_timerange = PythonOperator(
             task_id=_task_id,
             python_callable=get_timerange_from_yml,
             op_kwargs={'img_yml': None, 'ts_yml': ts_yml_file,
@@ -276,5 +276,5 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Task logic -----------------------------------------------------------
         verify_dir_available >> verify_qa4sm_available >> update_images >> get_timeranges >> decide_reshuffle
-        decide_reshuffle >> extend_ts >> get_new_ts_timerange >> update_period >> finish
-        decide_reshuffle >> get_new_ts_timerange >> update_period >> finish
+        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> finish
+        decide_reshuffle >> get_ts_timerange >> update_period >> finish
