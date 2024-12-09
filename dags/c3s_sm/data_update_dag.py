@@ -2,12 +2,10 @@ from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.docker.operators.docker import DockerOperator, Mount
 from airflow.models.dag import DAG
-from airflow.models.baseoperator import chain
 from datetime import datetime, timedelta
 
 import yaml
 import os
-from datetime import datetime
 import pandas as pd
 import logging
 
@@ -24,6 +22,8 @@ QA4SM_IP_OR_URL = os.environ["QA4SM_IP_OR_URL"]
 QA4SM_PORT_OR_NONE = os.environ["QA4SM_PORT_OR_NONE"]
 QA4SM_API_TOKEN = os.environ["QA4SM_API_TOKEN"]
 QA4SM_DATA_PATH = os.environ["QA4SM_DATA_PATH"]  # On the HOST machine
+EMAIL_ON_FAILURE = bool(int(os.environ.get("EMAIL_ON_FAILURE", 0)))
+
 
 # Source is on the HOST machine (not airflow container), target is in the worker image
 #   see also https://stackoverflow.com/questions/31381322/docker-in-docker-cannot-mount-volume
@@ -97,6 +97,7 @@ for version, dag_settings in DAG_SETUP.items():
     ts_path = dag_settings['ts_path']
     ext_start_date = dag_settings['ext_start_date']
     qa4sm_id = dag_settings['qa4sm_dataset_id']
+    email_on_failure = dag_settings['email_on_failure']
 
     img_yml_file = os.path.join(img_path, 'overview.yml')
     ts_yml_file = os.path.join(ts_path, 'overview.yml')
@@ -106,7 +107,7 @@ for version, dag_settings in DAG_SETUP.items():
             default_args={
                 "depends_on_past": False,
                 "email": ["support@qa4sm.eu"],
-                "email_on_failure": False,
+                "email_on_failure": EMAIL_ON_FAILURE,
                 "email_on_retry": False,
                 "retries": 1,
                 "retry_delay": timedelta(hours=1),

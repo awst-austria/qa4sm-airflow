@@ -25,6 +25,7 @@ QA4SM_IP_OR_URL = os.environ["QA4SM_IP_OR_URL"]
 QA4SM_PORT_OR_NONE = os.environ["QA4SM_PORT_OR_NONE"]
 QA4SM_API_TOKEN = os.environ["QA4SM_API_TOKEN"]
 QA4SM_DATA_PATH = os.environ["QA4SM_DATA_PATH"]  # On the HOST machine
+EMAIL_ON_FAILURE = bool(int(os.environ.get("EMAIL_ON_FAILURE", 0)))
 
 # Source is on the HOST machine (not airflow container), target is in the worker image
 #   see also https://stackoverflow.com/questions/31381322/docker-in-docker-cannot-mount-volume
@@ -102,7 +103,7 @@ for version, dag_settings in DAG_SETUP.items():
             default_args={
                 "depends_on_past": False,
                 "email": ["support@qa4sm.eu"],
-                "email_on_failure": False,
+                "email_on_failure": EMAIL_ON_FAILURE,
                 "email_on_retry": False,
                 "retries": 1,
                 "retry_delay": timedelta(hours=1),
@@ -255,7 +256,6 @@ for version, dag_settings in DAG_SETUP.items():
                        'QA4SM_IP_OR_URL': QA4SM_IP_OR_URL,
                        'QA4SM_API_TOKEN': QA4SM_API_TOKEN,
                        'ds_id': qa4sm_id},
-            trigger_rule="none_failed_min_one_success",
             doc=_doc,
         )
 
@@ -268,7 +268,6 @@ for version, dag_settings in DAG_SETUP.items():
         finish = PythonOperator(
             task_id=_task_id,
             python_callable=get_timerange_from_yml,
-            # trigger_rule='none_failed_min_one_success',
             op_kwargs={'img_yml': img_yml_file,
                        'ts_yml': ts_yml_file,
                        'ext_start_date': ext_start_date,

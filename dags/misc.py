@@ -49,16 +49,16 @@ def decide_ts_update_required(ti=None) -> str:
 
     if ts_to is None:
         if img_to >= ts_next:
-            update = "extend_ts"
+            continue_with = "extend_ts"
         else:
-            update = "get_ts_timerange"
+            continue_with = "get_ts_timerange"
     else:
         ts_to = pd.to_datetime(ts_to).to_pydatetime()
         if img_to > ts_to:
-            update = "extend_ts"
+            continue_with = "extend_ts"
         else:
-            update = "get_ts_timerange"
+            continue_with = "get_ts_timerange"
 
-    logging.info(f"Decision to update: {update}")
+    logging.info(f"Next task: {continue_with}")
 
-    return update
+    return continue_with
