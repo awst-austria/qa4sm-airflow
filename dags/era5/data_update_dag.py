@@ -119,6 +119,7 @@ for version, dag_settings in DAG_SETUP.items():
         Check if the data store is mounted, check if {img_path} and {ts_path} exist.
         """
         _command = bash_command = f"bash -c '[ -d \"{img_path}\" ] && [ -d \"{ts_path}\" ] || exit 1'"
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         # start container with sudo?
         verify_dir_available = DockerOperator(
             task_id=_task_id,
@@ -127,6 +128,7 @@ for version, dag_settings in DAG_SETUP.items():
             privileged=True,
             command=_command,
             mounts=[data_mount],
+            force_pull=True,  # make sure the image is pulled once the start of the pipeline
             auto_remove="force",
             mount_tmp_dir=False,
             doc=_doc
@@ -137,6 +139,7 @@ for version, dag_settings in DAG_SETUP.items():
         _doc = f"""
         Check if qa4sm is reachable, 0 = success, 1 = fail
         """
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         # start container with sudo?
         verify_qa4sm_available = BashOperator(
             task_id=_task_id,
@@ -146,6 +149,9 @@ for version, dag_settings in DAG_SETUP.items():
 
         # CDS Image Download----------------------------------------------------
         _task_id = f'update_images'
+        _command = f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
+                   f"""era5 update_img {img_path} --cds_token {os.environ['CDS_TOKEN']} || """ \
+                   f"""era5 download {img_path} -s {ext_start_date} -v swvl1,swvl2,swvl3,stl1,stl2,stl3 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'"""
         _doc = f"""
         This task will check if any image data is available in the img_path.
         If not it downloads all available data after the ext_start_date (first
@@ -154,15 +160,14 @@ for version, dag_settings in DAG_SETUP.items():
         This will not replace any existing files locally. This finds the LATEST 
         local file and checks if any new data AFTER this date is available.
         """
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         # https://airflow.apache.org/docs/apache-airflow-providers-docker/stable/_api/airflow/providers/docker/operators/docker/index.html
         update_images = DockerOperator(
             task_id=_task_id,
             image=IMAGE,
             container_name=f'task__ERA5__{version}__{_task_id}',
             privileged=True,
-            command=f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
-                    f"""era5 update_img {img_path} --cds_token {os.environ['CDS_TOKEN']} || """ \
-                    f"""era5 download {img_path} -s {ext_start_date} -v swvl1,swvl2,swvl3,stl1,stl2,stl3 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'""",
+            command=_command,
             mounts=[data_mount],
             auto_remove="force",
             timeout=3600 * 2,
@@ -208,6 +213,7 @@ for version, dag_settings in DAG_SETUP.items():
         _doc = f"""
         Creates new time series, or appends new data in time series format.
         """
+        logging.info(f"Running Container Command in {IMAGE}: {_command}")
         extend_ts = DockerOperator(
             task_id=_task_id,
             image=IMAGE,
@@ -224,8 +230,7 @@ for version, dag_settings in DAG_SETUP.items():
         # Optional: Get updated time range -------------------------------------
         _task_id = "get_new_ts_timerange"
         _doc = f"""
-        Only runs when an update was performed. Get the new time range of the 
-        time series after they were updated.
+        Get the current temporal coverage of the time series data
         """
         get_new_ts_timerange = PythonOperator(
             task_id=_task_id,
@@ -239,8 +244,8 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Optional: Send new time range to QA4SM -------------------------------
         _doc = f"""
-        After the time series is updated, use the NEW time range information
-        to update the qa4sm database for the dataset.
+        Report the latest covered period to the service to update it on the 
+        website.
         """
         update_period = PythonOperator(
             task_id='api_update_period',
@@ -255,7 +260,7 @@ for version, dag_settings in DAG_SETUP.items():
         # Always check the current time range again ----------------------------
         _task_id = "finish"
         _doc = f""" 
-        Print the current coverages again (either after update or not).
+        Print the current coverages again.
         This is just a wrap-up task that ALWAYS runs.
         """
         finish = PythonOperator(
@@ -272,4 +277,4 @@ for version, dag_settings in DAG_SETUP.items():
         # Task logic -----------------------------------------------------------
         verify_dir_available >> verify_qa4sm_available >> update_images >> get_timeranges >> decide_reshuffle
         decide_reshuffle >> extend_ts >> get_new_ts_timerange >> update_period >> finish
-        decide_reshuffle >> finish
+        decide_reshuffle >> get_new_ts_timerange >> update_period >> finish
