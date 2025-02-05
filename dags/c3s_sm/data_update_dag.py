@@ -9,7 +9,12 @@ import os
 import pandas as pd
 import logging
 
-from misc import api_update_period, decide_ts_update_required, load_qa4sm_dotenv
+from misc import (
+    api_update_period,
+    decide_ts_update_required,
+    load_qa4sm_dotenv,
+    api_update_fixtures,
+)
 
 # TODO:
 # - Change schedule (not daily)
@@ -251,12 +256,13 @@ for version, dag_settings in DAG_SETUP.items():
         )
 
         # Optional: Send new time range to QA4SM -------------------------------
+        _task_id = "api_update_period"
         _doc = f"""
         Report the latest covered period to the service to update it on the 
         website.
         """
         update_period = PythonOperator(
-            task_id='api_update_period',
+            task_id=_task_id,
             python_callable=api_update_period,
             op_kwargs={'QA4SM_PORT_OR_NONE': QA4SM_PORT_OR_NONE,
                        'QA4SM_IP_OR_URL': QA4SM_IP_OR_URL,
@@ -264,6 +270,22 @@ for version, dag_settings in DAG_SETUP.items():
                        'ds_id': qa4sm_id},
             doc=_doc,
         )
+
+        # Optional: Update and push fixtures -----------------------------------
+        _task_id = "api_update_fixtures"
+        _doc = f"""
+        Dump the updated periods to fixtures and push to github.
+        """
+        update_fixtures = PythonOperator(
+            task_id=_task_id,
+            python_callable=api_update_fixtures,
+            op_kwargs={'QA4SM_PORT_OR_NONE': QA4SM_PORT_OR_NONE,
+                       'QA4SM_IP_OR_URL': QA4SM_IP_OR_URL,
+                       'QA4SM_API_TOKEN': QA4SM_API_TOKEN
+                       },
+            doc=_doc,
+        )
+
 
         # Always check the current time range again ----------------------------
         _task_id = "finish"
@@ -282,6 +304,6 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Task Logic
         verify_dir_available >> verify_qa4sm_available >> update_images >> get_img_timeranges >> decide_ts_update
-        decide_ts_update >> extend_ts >> get_ts_timerange >> update_period >> finish
-        decide_ts_update >> get_ts_timerange >> update_period >> finish
+        decide_ts_update >> extend_ts >> get_ts_timerange >> update_period >> update_fixtures >> finish
+        decide_ts_update >> get_ts_timerange >> update_period >> update_fixtures >> finish
 
