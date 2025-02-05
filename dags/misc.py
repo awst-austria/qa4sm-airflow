@@ -10,6 +10,20 @@ def load_qa4sm_dotenv():
     if os.path.isfile(dotenv):
         load_dotenv(dotenv)
 
+def api_update_fixtures(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN):
+    if QA4SM_PORT_OR_NONE.lower() not in ['none', '']:
+        url = f"http://{QA4SM_IP_OR_URL}:{QA4SM_PORT_OR_NONE}/api/update-fixture-in-git"
+    else:
+        url = f"https://{QA4SM_IP_OR_URL}/api/update-fixture-in-git"
+
+    headers = {
+        "Authorization": f"Token {QA4SM_API_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    data = [{ }]
+    response = requests.post(url, headers=headers, json=data)
+
+    return str(response)
 
 def api_update_period(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN,
                       ds_id, ti=None) -> str:
