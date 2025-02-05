@@ -14,7 +14,12 @@ import os
 import pandas as pd
 import logging
 
-from misc import api_update_period, decide_ts_update_required, load_qa4sm_dotenv
+from misc import (
+    api_update_period,
+    decide_ts_update_required,
+    load_qa4sm_dotenv,
+    api_update_fixtures
+)
 
 # TODO:
 # - Change schedule (not daily)
@@ -259,6 +264,21 @@ for version, dag_settings in DAG_SETUP.items():
             doc=_doc,
         )
 
+        # Optional: Update and push fixtures -----------------------------------
+        _task_id = "api_update_fixtures"
+        _doc = f"""
+        Dump the updated periods to fixtures and push to github.
+        """
+        update_fixtures = PythonOperator(
+            task_id=_task_id,
+            python_callable=api_update_fixtures,
+            op_kwargs={'QA4SM_PORT_OR_NONE': QA4SM_PORT_OR_NONE,
+                       'QA4SM_IP_OR_URL': QA4SM_IP_OR_URL,
+                       'QA4SM_API_TOKEN': QA4SM_API_TOKEN
+                       },
+            doc=_doc,
+        )
+
         # Always check the current time range again ----------------------------
         _task_id = "finish"
         _doc = f""" 
@@ -277,5 +297,5 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Task logic -----------------------------------------------------------
         verify_dir_available >> verify_qa4sm_available >> update_images >> get_img_timeranges >> decide_reshuffle
-        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> finish
-        decide_reshuffle >> get_ts_timerange >> update_period >> finish
+        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> update_fixtures >> finish
+        decide_reshuffle >> get_ts_timerange >> update_period >> update_fixtures >> finish
