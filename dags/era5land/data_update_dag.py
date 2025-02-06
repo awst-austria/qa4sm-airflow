@@ -14,7 +14,10 @@ import os
 import pandas as pd
 import logging
 
-from misc import api_update_period, decide_ts_update_required, load_qa4sm_dotenv, log_command
+from misc import (
+    api_update_period, decide_ts_update_required,
+    load_qa4sm_dotenv, api_update_fixtures, log_command
+)
 
 load_qa4sm_dotenv()
 IMAGE = os.environ["ERA_DAG_IMAGE"]
@@ -23,7 +26,6 @@ QA4SM_PORT_OR_NONE = os.environ["QA4SM_PORT_OR_NONE"]
 QA4SM_API_TOKEN = os.environ["QA4SM_API_TOKEN"]
 QA4SM_DATA_PATH = os.environ["QA4SM_DATA_PATH"]  # On the HOST machine
 EMAIL_ON_FAILURE = bool(int(os.environ.get("EMAIL_ON_FAILURE", 0)))
-
 
 # Source is on the HOST machine (not airflow container), target is in the worker image
 #   see also https://stackoverflow.com/questions/31381322/docker-in-docker-cannot-mount-volume
@@ -268,6 +270,22 @@ for version, dag_settings in DAG_SETUP.items():
             doc=_doc,
         )
 
+        # Optional: Update and push fixtures -----------------------------------
+        _task_id = "api_update_fixtures"
+        _doc = f"""
+        Dump the updated periods to fixtures and push to github.
+        """
+        update_fixtures = PythonOperator(
+            task_id=_task_id,
+            python_callable=api_update_fixtures,
+            op_kwargs={'QA4SM_PORT_OR_NONE': QA4SM_PORT_OR_NONE,
+                       'QA4SM_IP_OR_URL': QA4SM_IP_OR_URL,
+                       'QA4SM_API_TOKEN': QA4SM_API_TOKEN
+                       },
+            on_execute_callback=log_command,
+            doc=_doc,
+        )
+
         # Always check the current time range again ----------------------------
         _task_id = "finish"
         _doc = f""" 
@@ -287,5 +305,5 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Task logic -----------------------------------------------------------
         verify_dir_available >> verify_qa4sm_available >> update_images >> get_img_timeranges >> decide_reshuffle
-        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> finish
-        decide_reshuffle >> get_ts_timerange >> update_period >> finish
+        decide_reshuffle >> extend_ts >> get_ts_timerange >> update_period >> update_fixtures >> finish
+        decide_reshuffle >> get_ts_timerange >> update_period >> update_fixtures >> finish
