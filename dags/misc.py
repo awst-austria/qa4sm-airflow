@@ -10,6 +10,23 @@ def load_qa4sm_dotenv():
     if os.path.isfile(dotenv):
         load_dotenv(dotenv)
 
+def log_command(context):
+    # Log the command that will be executed
+    task = context['task']
+    if hasattr(task, 'command') and task.command:
+        # Log the command for DockerOperator
+        logging.info(f"EXECUTING DOCKER COMMAND: {task.command}")
+    elif hasattr(task, 'python_callable') and task.python_callable:
+        python_callable_name = task.python_callable.__name__
+        try:
+            op_kwargs = task.__getattribute__('op_kwargs')
+        except AttributeError:
+            op_kwargs = {}
+        logging.info(f"Executing Python callable: {python_callable_name}")
+        logging.info(f"With op_kwargs: {op_kwargs}")
+    else:
+        logging.info("Task does not have a command or callable to log.")
+
 
 def api_update_period(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN,
                       ds_id, ti=None) -> str:
