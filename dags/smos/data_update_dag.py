@@ -14,7 +14,8 @@ import os
 import pandas as pd
 import logging
 
-from misc import api_update_period, decide_ts_update_required, load_qa4sm_dotenv
+from misc import (api_update_period, decide_ts_update_required,
+                  load_qa4sm_dotenv, log_command)
 
 load_qa4sm_dotenv()
 IMAGE = os.environ["SMOS_DAG_IMAGE"]
@@ -27,6 +28,8 @@ EMAIL_ON_FAILURE = bool(int(os.environ.get("EMAIL_ON_FAILURE", 0)))
 # Source is on the HOST machine (not airflow container), target is in the worker image
 #   see also https://stackoverflow.com/questions/31381322/docker-in-docker-cannot-mount-volume
 data_mount = Mount(target="/qa4sm/data", source=QA4SM_DATA_PATH, type='bind')
+
+logger = logging.getLogger(__name__)
 
 """
 All versions are added to the list. The dag itself can be 
@@ -132,6 +135,7 @@ for version, dag_settings in DAG_SETUP.items():
             force_pull=True,  # make sure the image is pulled once the start of the pipeline
             auto_remove="force",  # The container can still be removed, image is kept
             mount_tmp_dir=False,
+            on_execute_callback=log_command,
             doc=_doc
         )
 
@@ -144,6 +148,7 @@ for version, dag_settings in DAG_SETUP.items():
         verify_qa4sm_available = BashOperator(
             task_id=_task_id,
             bash_command=_command,
+            on_execute_callback=log_command,
             doc=_doc
         )
 
@@ -172,6 +177,7 @@ for version, dag_settings in DAG_SETUP.items():
             auto_remove="force",
             timeout=3600 * 2,
             mount_tmp_dir=False,
+            on_execute_callback=log_command,
             doc=_doc,
         )
 
@@ -189,6 +195,7 @@ for version, dag_settings in DAG_SETUP.items():
                        'do_print': True},
             multiple_outputs=True,
             do_xcom_push=True,
+            on_execute_callback=log_command,
             doc=_doc,
         )
 
@@ -203,6 +210,7 @@ for version, dag_settings in DAG_SETUP.items():
         decide_reshuffle = BranchPythonOperator(
             task_id=_task_id,
             python_callable=decide_ts_update_required,
+            on_execute_callback=log_command,
             doc=_doc,
         )
 
@@ -225,6 +233,7 @@ for version, dag_settings in DAG_SETUP.items():
             auto_remove="force",
             timeout=3600 * 2,
             mount_tmp_dir=False,
+            on_execute_callback=log_command,
             doc=_doc,
         )
 
@@ -241,6 +250,7 @@ for version, dag_settings in DAG_SETUP.items():
             multiple_outputs=True,
             do_xcom_push=True,
             trigger_rule="none_failed_min_one_success",
+            on_execute_callback=log_command,
             doc=_doc,
         )
 
@@ -256,6 +266,7 @@ for version, dag_settings in DAG_SETUP.items():
                        'QA4SM_IP_OR_URL': QA4SM_IP_OR_URL,
                        'QA4SM_API_TOKEN': QA4SM_API_TOKEN,
                        'ds_id': qa4sm_id},
+            on_execute_callback=log_command,
             doc=_doc,
         )
 
@@ -271,6 +282,7 @@ for version, dag_settings in DAG_SETUP.items():
                        'ts_yml': ts_yml_file,
                        'ext_start_date': ext_start_date,
                        'do_print': True},
+            on_execute_callback=log_command,
             doc=_doc,
         )
 
