@@ -142,6 +142,7 @@ for version, dag_settings in DAG_SETUP.items():
             force_pull=True,  # make sure the image is pulled once the start of the pipeline
             auto_remove="force",
             mount_tmp_dir=False,
+            docker_url='tcp://docker-proxy:2375',
             on_execute_callback=log_command,
             doc=_doc
         )
@@ -184,6 +185,7 @@ for version, dag_settings in DAG_SETUP.items():
             timeout=3600 * 2,
             mount_tmp_dir=False,
             on_execute_callback=log_command,
+            docker_url='tcp://docker-proxy:2375',
             doc=_doc,
         )
 
@@ -241,6 +243,7 @@ for version, dag_settings in DAG_SETUP.items():
             timeout=3600 * 2,
             mount_tmp_dir=False,
             on_execute_callback=log_command,
+            docker_url='tcp://docker-proxy:2375',
             doc=_doc,
         )
 
