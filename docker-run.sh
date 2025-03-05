@@ -12,13 +12,20 @@ setup=$1
 # This contains access tokens and must be added manually
 #source qa4sm.env
 
+if [ "$setup" = "" ]; then
+  echo "You have to pick a user."
+  exit 1
+fi
+
+
 echo "Setting up DEVELOPMENT Setup, User = $setup"
 export AIRFLOW_USER=$setup
 
-#if [ `id -u` -ne 0 ]; then
-#  echo "ERROR: Please run this script with sudo (for now)!"
-#  exit 1
-#fi
+UID=$(id -u $USER)
+if [ "$UID" = 0 ]; then
+    echo "Don't run this script with sudo!"
+    exit 1
+fi
 
 # These are required by docker compose and will be synchronized between this package and the container
 mkdir -p ./dags ./logs ./plugins ./config
@@ -31,10 +38,6 @@ cat qa4sm.env >> .env
 # Now we setup all the images that the workers might need
 # Maybe pull them from dockerhub or geo.gitlab
 # Maybe build them
-
-
-# https://github.com/puckel/docker-airflow/issues/543
-#sudo chmod 777 /var/run/docker.sock
 
 # start all necessary containers
 docker compose --verbose up --detach airflow-init

@@ -78,6 +78,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${QA4SM_DATA_PATH}:/qa4sm/data
+    - /var/run/docker.sock:/var/run/docker.sock
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -91,10 +92,10 @@ x-airflow-common:
 
 services:
   docker-proxy:
-    image: alpine/socat
+    image: alpine/socat:1.8.0.0
     command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
     ports:
-      - "2376:2375"
+      - "2375:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
