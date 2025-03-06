@@ -43,7 +43,7 @@ DAG_SETUP = {
         'img_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_latest-ext/images/",
         'ts_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_latest-ext/timeseries/",
         'ext_start_date': "2023-01-01",
-        'qa4sm_dataset_id': "16",
+        'qa4sm_dataset_id': "62",
     },
 }
 
