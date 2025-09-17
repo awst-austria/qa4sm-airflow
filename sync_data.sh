@@ -7,7 +7,7 @@
 
 # Define local and remote paths
 LOCAL="/data-read/qa4sm-airflow-data/"
-REMOTE="qa4sms1:/qa4sm/data/"
+REMOTE="qa4sms2:/qa4sm/data/"
 
 # Define remote directories to sync
 REMOTE_DIRS=(
