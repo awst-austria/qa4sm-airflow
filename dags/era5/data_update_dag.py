@@ -40,7 +40,7 @@ DAG_SETUP = {
         # Paths here refer to the worker image and should not be changed!
         'img_path': "/qa4sm/data/ERA5/ERA5_latest-ext/images/",
         'ts_path': "/qa4sm/data/ERA5/ERA5_latest-ext/timeseries/",
-        'ext_start_date': "2023-01-01",
+        'ext_start_date': "2025-01-01",
         'qa4sm_dataset_id': "57",
     },
 }
@@ -155,7 +155,7 @@ for version, dag_settings in DAG_SETUP.items():
         _task_id = f'update_images'
         _command = f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
                    f"""era5 update_img {img_path} --cds_token {os.environ['CDS_TOKEN']} || """ \
-                   f"""era5 download {img_path} -s {ext_start_date} -v swvl1,swvl2,swvl3,stl1,stl2,stl3 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'"""
+                   f"""era5 download {img_path} -s {ext_start_date} -v swvl1,swvl2,swvl3,swvl4,stl1,stl2,stl3,stl4 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'"""
         _doc = f"""
         This task will check if any image data is available in the img_path.
         If not it downloads all available data after the ext_start_date (first
