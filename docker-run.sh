@@ -21,8 +21,8 @@ fi
 echo "Setting up DEVELOPMENT Setup, User = $setup"
 export AIRFLOW_USER=$setup
 
-UID=$(id -u $USER)
-if [ "$UID" = 0 ]; then
+USER_ID=$(id -u $USER)
+if [ "$USER_ID" = 0 ]; then
     echo "Don't run this script with sudo!"
     exit 1
 fi
