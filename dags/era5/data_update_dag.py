@@ -40,7 +40,7 @@ DAG_SETUP = {
         # Paths here refer to the worker image and should not be changed!
         'img_path': "/qa4sm/data/ERA5/ERA5_latest-ext/images/",
         'ts_path': "/qa4sm/data/ERA5/ERA5_latest-ext/timeseries/",
-        'ext_start_date': "2025-01-01",
+        'ext_start_date': "2024-01-01",
         'qa4sm_dataset_id': "57",
     },
 }

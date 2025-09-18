@@ -42,7 +42,7 @@ DAG_SETUP = {
         # Paths here refer to the worker image and should not be changed!
         'img_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_latest-ext/images/",
         'ts_path': "/qa4sm/data/ERA5_LAND/ERA5_LAND_latest-ext/timeseries/",
-        'ext_start_date': "2024-01-01",
+        'ext_start_date': "2025-01-01",
         'qa4sm_dataset_id': "62",
     },
 }
@@ -165,7 +165,7 @@ for version, dag_settings in DAG_SETUP.items():
         """
         _command = f"""bash -c '[ "$(ls -A {img_path})" ] && """ \
                    f"""era5land update_img {img_path} --cds_token {os.environ['CDS_TOKEN']} || """ \
-                   f"""era5land download {img_path} -s {ext_start_date} -v swvl1,stl1 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'"""
+                   f"""era5land download {img_path} -s {ext_start_date} -v swvl1,swvl2,swvl3,swvl4,stl1,stl2,stl3,stl4 --h_steps 0,6,12,18 --keep_prelim False --cds_token {os.environ['CDS_TOKEN']}'"""
         logging.info(f"Running Container Command in {IMAGE}: {_command}")
 
         # https://airflow.apache.org/docs/apache-airflow-providers-docker/stable/_api/airflow/providers/docker/operators/docker/index.html
@@ -220,7 +220,7 @@ for version, dag_settings in DAG_SETUP.items():
         # Optional: Initial extension TS ---------------------------------------
         _task_id = "extend_ts"
         _command = f"""bash -c '[ "$(ls -A {os.path.join(ts_path, '*.nc')})" ] && era5land update_ts {ts_path} --imgpath {img_path} || """ \
-                   f"""era5land reshuffle {img_path} {ts_path} -s {ext_start_date} --land_points True --imgbuffer 25'"""
+                   f"""era5land reshuffle {img_path} {ts_path} -s {ext_start_date} --land_points True --cellsize 2.5 --imgbuffer 25'"""
         _doc = f"""
         Creates new time series, or appends new data in time series format.
         """
