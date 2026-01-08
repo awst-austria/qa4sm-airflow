@@ -42,9 +42,9 @@ All versions are added to the list. The dag itself can be
 DAG_SETUP = {
     'SMAP_L3_V9': {
         # Paths here refer to the worker image and should not be changed!
-        'img_path': "/qa4sm/data/SMAP_L3/SMAP_V9_AM_PM/images",
-        'ts_path': "/qa4sm/data/SMAP_L3/SMAP_V9_AM_PM/timeseries",
-        'ext_start_date': "2025-11-30",
+        'img_path': "/qa4sm/data/SMAP_L3/SMAP_V9_AM_PM-ext/images",
+        'ts_path': "/qa4sm/data/SMAP_L3/SMAP_V9_AM_PM-ext/timeseries",
+        'ext_start_date': "2025-01-26",
         'qa4sm_dataset_id': "64",
     },
 }
