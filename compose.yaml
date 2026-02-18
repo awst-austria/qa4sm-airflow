@@ -308,6 +308,9 @@ services:
   airflow-dag-era5:
     image: ${ERA_DAG_IMAGE}
     pull_policy: always  #  images are pulled when launching the service.
+  airflow-dag-smap:
+    image: ${SMAP_DAG_IMAGE}
+    pull_policy: missing  #  images are pulled when launching the service.
 
 volumes:
   postgres-db-volume:

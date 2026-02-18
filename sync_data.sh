@@ -16,6 +16,7 @@ REMOTE_DIRS=(
     "ERA5/ERA5_latest-ext"
     "ERA5_LAND/ERA5_LAND_latest-ext"
     "SMOS_L2/SMOSL2_v700-ext"
+    "SMAP_L3/SMAP_V9_AM_PM-ext"
 )
 
 # Loop through each remote directory and sync with rsync
