@@ -43,8 +43,9 @@ def api_update_fixtures(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN):
     return str(response)
 
 def api_update_period(QA4SM_PORT_OR_NONE, QA4SM_IP_OR_URL, QA4SM_API_TOKEN,
-                      ds_id, ti=None) -> str:
-    new_ts_to_date: str = ti.xcom_pull("get_ts_timerange", key="ts_to")
+                      ds_id, ti=None,
+                      ts_task_id="get_ts_timerange", ts_key="ts_to") -> str:
+    new_ts_to_date: str = ti.xcom_pull(task_ids=ts_task_id, key=ts_key)
     if QA4SM_PORT_OR_NONE.lower() not in ['none', '']:
         url = f"http://{QA4SM_IP_OR_URL}:{QA4SM_PORT_OR_NONE}/api/update-dataset-version"
     else:
