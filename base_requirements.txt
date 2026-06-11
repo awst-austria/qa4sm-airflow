@@ -2,3 +2,5 @@ apache-airflow==2.9.2
 apache-airflow-providers-docker
 numpy
 pandas
+qa4sm-api
+qa4sm_autoreports
