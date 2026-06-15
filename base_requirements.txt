@@ -3,4 +3,4 @@ apache-airflow-providers-docker
 numpy
 pandas
 qa4sm-api
-qa4sm_autoreports
+git+https://github.com/awst-austria/qa4sm-autoreports@main

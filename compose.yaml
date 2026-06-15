@@ -72,12 +72,16 @@ x-airflow-common:
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    CARTOPY_DATA_DIR: /tmp/cartopy
+    XDG_DATA_HOME: /tmp/.local/share
+    MPLCONFIGDIR: /tmp/matplotlib
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${QA4SM_DATA_PATH}:/qa4sm/data
+    - ${QA4SM_REPORTS_PATH}:/qa4sm/autoreports
     - /var/run/docker.sock:/var/run/docker.sock
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
@@ -296,24 +300,24 @@ services:
         condition: service_completed_successfully
 
   # Any images used in DAGs should be added here, to verify they exist upons starting airflow
-  airflow-dag-c3s:
-    image: ${C3S_SM_DAG_IMAGE}
-    pull_policy: always  #  images are pulled when launching the service.
-  airflow-dag-smos:
-    image: ${SMOS_DAG_IMAGE}
-    pull_policy: always  #  images are pulled when launching the service.
-  airflow-dag-era5land:
-    image: ${ERA_DAG_IMAGE}
-    pull_policy: always  #  images are pulled when launching the service.
-  airflow-dag-era5:
-    image: ${ERA_DAG_IMAGE}
-    pull_policy: always  #  images are pulled when launching the service.
-  airflow-dag-smap:
-    image: ${SMAP_DAG_IMAGE}
-    pull_policy: missing  #  images are pulled when launching the service.
-  airflow-dag-ismn:
-    image: ${ISMN_DAG_IMAGE}
-    pull_policy: always  #  images are pulled when launching the service.
+#  airflow-dag-c3s:
+#    image: ${C3S_SM_DAG_IMAGE}
+#    pull_policy: always  #  images are pulled when launching the service.
+#  airflow-dag-smos:
+#    image: ${SMOS_DAG_IMAGE}
+#    pull_policy: always  #  images are pulled when launching the service.
+#  airflow-dag-era5land:
+#    image: ${ERA_DAG_IMAGE}
+#    pull_policy: always  #  images are pulled when launching the service.
+#  airflow-dag-era5:
+#    image: ${ERA_DAG_IMAGE}
+#    pull_policy: always  #  images are pulled when launching the service.
+#  airflow-dag-smap:
+#    image: ${SMAP_DAG_IMAGE}
+#    pull_policy: missing  #  images are pulled when launching the service.
+#  airflow-dag-ismn:
+#    image: ${ISMN_DAG_IMAGE}
+#    pull_policy: always  #  images are pulled when launching the service.
 
 volumes:
   postgres-db-volume:

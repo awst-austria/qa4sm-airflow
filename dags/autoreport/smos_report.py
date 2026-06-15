@@ -9,6 +9,8 @@ from airflow.operators.python import (
     BranchPythonOperator)
 from airflow.sensors.python import PythonSensor
 from airflow.models.dag import DAG
+from airflow.operators.empty import EmptyOperator
+
 from datetime import datetime, timedelta
 from pathlib import Path
 import logging
@@ -17,10 +19,9 @@ import os.path
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import calendar
+from misc import load_qa4sm_dotenv
 
-from qa4sm_apps import Connection
-from qa4sm_apps.autoreports.series import AutoReportSeries
-from qa4sm_apps.autoreports.utils import ValidationReportError
+load_qa4sm_dotenv()
 
 QA4SM_IP_OR_URL = os.environ["QA4SM_IP_OR_URL"]
 QA4SM_PORT_OR_NONE = os.environ["QA4SM_PORT_OR_NONE"]
@@ -30,19 +31,20 @@ if QA4SM_PORT_OR_NONE.lower() in ["none", ""]:
 else:
     QA4SM_INSTANCE = f"{QA4SM_IP_OR_URL}:{QA4SM_PORT_OR_NONE}"
 
-QA4SM_REPORTS_PATH = Path(os.environ["QA4SM_REPORTS_PATH"])  # On the HOST machine
+QA4SM_REPORTS_ROOT = Path(os.environ["QA4SM_REPORTS_PATH"])  # On the HOST machine
 QA4SM_TOKEN = os.environ["QA4SM_API_TOKEN"]
 EMAIL_ON_FAILURE = bool(int(os.environ.get("EMAIL_ON_FAILURE", 0)))
 
-connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=False)
+report_collection = QA4SM_REPORTS_ROOT / "pdf" / "SMOS_L2_v700"
+series_root = QA4SM_REPORTS_ROOT / "results" / "SMOS_L2_v700"
+dag_dir = Path(__file__).parent
+config_path = dag_dir / "smos_l2_v700" / "report_config_templates"
+latex_templ_path = dag_dir / "smos_l2_v700" / "report_latex_templates" / "src"
 
-report_collection = QA4SM_REPORTS_PATH / "pdf_reports" / "SMOS_L2_v700"
-series_root = QA4SM_REPORTS_PATH / "results" / "SMOS_L2_v700"
-config_path = "/home/wpreimes/shares/home/code/qa4sm-apps/configs/smos_l2_v700/report_config_templates"
-latex_templ_path = "/home/wpreimes/shares/home/code/qa4sm-apps/configs/smos_l2_v700/report_latex_templates/src"
-
-assert os.path.exists(report_collection)
-assert os.path.exists(series_root)
+assert os.path.exists(report_collection), f"Path not found {report_collection}"
+assert os.path.exists(series_root), f"Path not found {series_root}"
+assert os.path.exists(config_path), f"Path not found {config_path}"
+assert os.path.exists(latex_templ_path), f"Path not found {latex_templ_path}"
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +56,11 @@ def _get_report_name(**context) -> tuple[str, str, str]:
     """
     report_date = context["logical_date"].date().replace(day=1)
     interval_from, interval_to = period_for_report(str(report_date), period_months=3)
-    report_name = f"{interval_from}_to_{interval_to}"
+    report_name = f"{interval_to}"
     return report_name, interval_from, interval_to
 
 
-def _verify_service_access(connection, **context):
+def _verify_service_access(**context):
     """
     Verify that airflow can log in as a user.
 
@@ -66,10 +68,15 @@ def _verify_service_access(connection, **context):
     ------
     ValidationReportError: When the login was not successful
     """
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.utils import ValidationReportError
+
+    logger.info("Verifying service access to %s", QA4SM_INSTANCE)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     user = connection.session.user
-    print(f"Airflow API connection successful. User: {user}.")
-    # FIX #6: was `!=`, should be `==` — raise when NOT authenticated
+    logger.info("API connection successful. Logged in as: %s", user)
     if user.lower() == "anonymous":
+        logger.error("Login returned anonymous user — service is not accessible")
         raise ValidationReportError("Service is not accessible.")
 
 
@@ -127,36 +134,50 @@ def _is_staging_required_branch(**context) -> str:
     stage it again, and can directly check if we have to process the
     validation run.
     """
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
+
     report_name, _, _ = _get_report_name(**context)
+    logger.info("[%s] Checking if staging is required", report_name)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     series = AutoReportSeries(series_root=series_root, connection=connection)
 
     dir_exists = (series.series_root / report_name).exists()
     report_in_series = report_name in series.reports.keys()
+    logger.info("[%s] dir_exists=%s, report_in_series=%s", report_name, dir_exists, report_in_series)
 
     if (not dir_exists) and (not report_in_series):
+        logger.info("[%s] → branching to: stage_new_report", report_name)
         return 'stage_new_report'
     else:
+        logger.info("[%s] → branching to: is_processing_required_branch", report_name)
         return 'is_processing_required_branch'
 
 
 def _stage_new_report(**context):
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
+
     report_name, interval_from, interval_to = _get_report_name(**context)
+    logger.info("[%s] Staging new report (interval: %s → %s)", report_name, interval_from, interval_to)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     series = AutoReportSeries(series_root=series_root, connection=connection)
 
     series.new_report(
         report_name, config_path,
-        override_params={                   # FIX #4: was `override_kwargs`
+        override_params={
             'interval_from': interval_from,
             'interval_to': interval_to,
-            # todo: delete:
-            "min_lat": -17.0,
-            "min_lon": 140.0,
-            "max_lat": -12.0,
-            "max_lon": 150.0,
+            # todo: delete later in in prod
+            "min_lat": 35.0,
+            "min_lon": -10.0,
+            "max_lat": 66.0,
+            "max_lon": 40.0,
         },
         instance=QA4SM_INSTANCE,
         token=QA4SM_TOKEN,
     )
+    logger.info("[%s] Staging complete", report_name)
 
 
 def _is_processing_required_branch(**context) -> str:
@@ -168,12 +189,25 @@ def _is_processing_required_branch(**context) -> str:
         - 3 - Collected: All results were downloaded locally
         - 4 - Compiled: PDF was created
     """
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
+
     report_name, _, _ = _get_report_name(**context)
+    logger.info("[%s] Checking processing status", report_name)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     series = AutoReportSeries(series_root=series_root, connection=connection)
 
-    if series[report_name].status == 0:
-        return 'check_data_availability'
+    status = series[report_name].status
+    logger.info("[%s] Current status: %d", report_name, status)
+
+    if status == 0:
+        logger.info("[%s] → branching to: wait_for_data", report_name)
+        return 'wait_for_data'
+    elif status == 1:
+        logger.info("[%s] → branching to: wait_for_validation", report_name)
+        return 'wait_for_validation'
     else:
+        logger.info("[%s] → branching to: is_compiling_required_branch", report_name)
         return 'is_compiling_required_branch'
 
 
@@ -186,12 +220,22 @@ def _is_compiling_required_branch(**context) -> str:
         - 3 - Collected: All results were downloaded locally
         - 4 - Compiled: PDF was created
     """
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
+
     report_name, _, _ = _get_report_name(**context)
+    logger.info("[%s] Checking if compiling is required", report_name)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     series = AutoReportSeries(series_root=series_root, connection=connection)
 
-    if series[report_name].status == 2:
+    status = series[report_name].status
+    logger.info("[%s] Current status: %d", report_name, status)
+
+    if status in [2, 3]:
+        logger.info("[%s] → branching to: collect_and_compile", report_name)
         return 'collect_and_compile'
     else:
+        logger.info("[%s] → branching to: finish (already compiled)", report_name)
         return 'finish'
 
 
@@ -203,9 +247,15 @@ def _start_validation_runs(**context):
     The validation runs process asynchronously, so this function will return
     immediately.
     """
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
+
     report_name, _, _ = _get_report_name(**context)
-    series = AutoReportSeries(series_root=series_root, connection=connection)  # FIX #3: was `connection`
+    logger.info("[%s] Starting all validation runs", report_name)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
+    series = AutoReportSeries(series_root=series_root, connection=connection)
     series[report_name].start_all_runs()
+    logger.info("[%s] All validation runs triggered (async)", report_name)
 
 
 def _sense_runs_finished(**context) -> bool:
@@ -217,52 +267,81 @@ def _sense_runs_finished(**context) -> bool:
         - 3 - Collected: All results were downloaded locally
         - 4 - Compiled: PDF was created
     """
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
+
     report_name, _, _ = _get_report_name(**context)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     series = AutoReportSeries(series_root=series_root, connection=connection)
-    return series[report_name].status >= 2
+    status = series[report_name].status
+    finished = status >= 2
+    logger.info("[%s] Validation runs finished check: status=%d, finished=%s",
+                report_name, status, finished)
+    return finished
 
 
 def _sense_data_available(**context) -> bool:
     """
     Verify whether the required datasets are already in the service.
     """
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
+
     report_name, _, _ = _get_report_name(**context)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     series = AutoReportSeries(series_root=series_root, connection=connection)
-    return series[report_name].verify_dataset_availability()
+    is_available = series[report_name].verify_dataset_availability()
+
+    for i, run in enumerate(series[report_name].runs.values()):
+        period_start = run.config['interval_from']
+        period_end = run.config['interval_to']
+        logger.info(f"Run {i}: Start={period_start}, End={period_end}")
+
+    logger.info("[%s] Data availability check: available=%s",
+                report_name, is_available)
+    return is_available
 
 
 def _collect_and_compile(**context):
-    report_name, _, _ = _get_report_name(**context)
-    series = AutoReportSeries(series_root=series_root, connection=connection)  # FIX #3: was `connection`
+    from qa4sm_autoreports import Connection
+    from qa4sm_autoreports.series import AutoReportSeries
 
+    report_name, _, _ = _get_report_name(**context)
+    logger.info("[%s] Starting collect and compile", report_name)
+    connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
+    series = AutoReportSeries(series_root=series_root, connection=connection)
+
+    logger.info("[%s] Collecting results", report_name)
     series[report_name].collect_content()
 
-    series.track_metric(metric='urmsd_between_0-SMOS_L2_and_1-C3S_combined',
-                        unit='m³m⁻³', ref_epoch=report_name, n_epochs=12,
-                        path_out=series[report_name].report_root)
+    metrics = [
+        ('urmsd_between_0-SMOS_L2_and_1-C3S_combined', 'm³m⁻³', None),
+        ('urmsd_between_0-SMOS_L2_and_1-ERA5_LAND',    'm³m⁻³', None),
+        ('R_between_0-SMOS_L2_and_1-C3S_combined',     '-',     'p_R_between_0-SMOS_L2_and_1-C3S_combined'),
+        ('R_between_0-SMOS_L2_and_1-ERA5_LAND',        '-',     'p_R_between_0-SMOS_L2_and_1-ERA5_LAND'),
+    ]
+    for metric, unit, p_mask in metrics:
+        logger.info("[%s] Tracking metric: %s", report_name, metric)
+        kwargs = dict(
+            metric=metric, unit=unit,
+            ref_epoch=report_name, n_epochs=12,
+            path_out=series[report_name].report_root / "tracking",
+        )
+        if metric.startswith('R_'):
+            kwargs['pretty_name'] = 'R'
+            kwargs['p_mask_var'] = p_mask
+        series.track_metric(**kwargs)
 
-    series.track_metric(metric='urmsd_between_0-SMOS_L2_and_1-ERA5_LAND',
-                        unit='m³m⁻³', ref_epoch=report_name, n_epochs=12,
-                        path_out=series[report_name].report_root)
-
-    series.track_metric(metric='R_between_0-SMOS_L2_and_1-C3S_combined',
-                        pretty_name='R', unit='-', ref_epoch=report_name,
-                        n_epochs=12,
-                        p_mask_var='p_R_between_0-SMOS_L2_and_1-C3S_combined',
-                        path_out=series[report_name].report_root)
-
-    series.track_metric(metric='R_between_0-SMOS_L2_and_1-ERA5_LAND',
-                        pretty_name='R', unit='-', ref_epoch=report_name,
-                        n_epochs=12,
-                        p_mask_var='p_R_between_0-SMOS_L2_and_1-ERA5_LAND',
-                        path_out=series[report_name].report_root)
-
+    logger.info("[%s] Compiling PDF report", report_name)
     series[report_name].compile(template_path=latex_templ_path, tex_ignore=None)
 
+    dest = report_collection / f"{report_name}.pdf"
+    logger.info("[%s] Copying PDF to %s", report_name, dest)
     shutil.copy(
         series[report_name].report_root / 'pdf_report' / 'main.pdf',
-        report_collection / f"{report_name}.pdf"
+        dest
     )
+    logger.info("[%s] collect_and_compile done", report_name)
 
 
 # The dag runs every month and tries to build the validation report for the
@@ -270,8 +349,7 @@ def _collect_and_compile(**context):
 with DAG(
         "SMOS_L2-v700-Autoreport",
         default_args={
-            "depends_on_past": True,
-            # FIX #5: removed `catchup` from default_args, it's a DAG-level arg
+            "depends_on_past": False,
             "email": ["support@qa4sm.eu"],
             "email_on_failure": EMAIL_ON_FAILURE,
             "email_on_retry": EMAIL_ON_FAILURE,
@@ -280,8 +358,8 @@ with DAG(
         },
         description="Create SMOS L2 validation report",
         schedule="0 0 1 * *",  # 1st of each month
-        start_date=datetime(2024, 1, 1),
-        end_date=datetime(2024, 12, 31),   # todo: delete
+        start_date=datetime(2025, 1, 1),
+        end_date=datetime(2025, 12, 31),   # todo: delete in prod
         catchup=True,
         max_active_runs=1,
         tags=["smos_l2", "v700", "autoreport"],
@@ -290,7 +368,6 @@ with DAG(
     verify_service_access = PythonOperator(
         task_id="verify_service_access",
         python_callable=_verify_service_access,
-        op_kwargs={"connection": connection},
         doc="Establish a connection to the instance from the global config "
             "using the token from the config. Will fail if the login as user "
             "does not work."
@@ -345,7 +422,7 @@ with DAG(
     wait_for_validation = PythonSensor(
         task_id="wait_for_validation",     # FIX #2: was duplicate "wait_for_data"
         python_callable=_sense_runs_finished,
-        poke_interval=60 * 60 * 1,         # check every hour
+        poke_interval=60 * 1,         # check every hour, todo: change from minute to hour 60 * 60 * 1
         timeout=60 * 60 * 24 * 5,          # give up after 5 days
         mode="reschedule",                 # frees up worker slot while waiting
         doc="Wait for the validation runs triggered on the server to finish. "
@@ -367,9 +444,8 @@ with DAG(
             "the PDF report."
     )
 
-    finish = PythonOperator(
+    finish = EmptyOperator(
         task_id="finish",
-        python_callable=lambda **context: print("Finish"),
         doc="No-op terminal task to close the DAG run cleanly.",
     )
 
@@ -377,6 +453,7 @@ with DAG(
     is_staging_required_branch >> stage_new_report >> is_processing_required_branch
     is_staging_required_branch >> is_processing_required_branch
     is_processing_required_branch >> wait_for_data >> start_validation_runs >> wait_for_validation >> is_compiling_required_branch
+    is_processing_required_branch >> wait_for_validation >> is_compiling_required_branch
     is_processing_required_branch >> is_compiling_required_branch
     is_compiling_required_branch >> collect_and_compile >> finish
     is_compiling_required_branch >> finish

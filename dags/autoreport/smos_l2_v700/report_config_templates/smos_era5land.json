@@ -1,0 +1,78 @@
+{
+  "name_tag": "SMOS L2 vs ERA5-Land",
+  "interval_from": "9999-01-01",
+  "interval_to": "9999-12-31",
+  "temporal_matching": 6,
+  "anomalies_method": "none",
+  "anomalies_from": "1990-01-01",
+  "anomalies_to": "2020-12-30",
+  "min_lat": -90.0,
+  "min_lon": -180.0,
+  "max_lat": 90.0,
+  "max_lon": 180.0,
+  "scaling_method": "none",
+  "metrics": [
+    {
+      "id": "tcol",
+      "value": false
+    },
+    {
+      "id": "bootstrap_tcol_cis",
+      "value": false
+    },
+    {
+      "id": "stability_metrics",
+      "value": false
+    }
+  ],
+  "intra_annual_metrics": {
+    "intra_annual_metrics": false,
+    "intra_annual_type": "",
+    "intra_annual_overlap": null
+  },
+  "dataset_configs": [
+    {
+      "dataset_id": 9,
+      "version_id": 62,
+      "variable_id": 12,
+      "is_spatial_reference": false,
+      "is_temporal_reference": false,
+      "is_scaling_reference": false,
+      "basic_filters": [
+        1,
+        17
+      ],
+      "parametrised_filters": []
+    },
+    {
+      "dataset_id": 15,
+      "version_id": 39,
+      "variable_id": 19,
+      "is_spatial_reference": true,
+      "is_temporal_reference": true,
+      "is_scaling_reference": false,
+      "basic_filters": [
+        1,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42
+      ],
+      "parametrised_filters": [
+        {
+          "id": 35,
+          "parameters": "0.05"
+        }
+      ]
+    }
+  ],
+  "settings_changes": {
+    "filters": [],
+    "anomalies": false,
+    "scaling": false,
+    "variables": [],
+    "versions": []
+  }
+}
