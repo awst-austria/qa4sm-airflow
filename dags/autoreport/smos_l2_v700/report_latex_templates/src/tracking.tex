@@ -1,0 +1,45 @@
+\section{Performance Tracking}
+
+The performance of SMOS L2 is tracked against the two reference datasets (ERA5-Land and C3S combined)
+in terms of ubRMSD and Pearson's R. Performance tracking considers results from the latest 12 validation epochs.
+To ensure samples that are large enough to compute the metrics, data from the last 3 months is used
+(via a rolling window), meaning that there is a 2-month overlap between adjacent epochs.
+
+Figure \ref{fig:tracking_R} tracks the performance of SMOS L2 in terms of Pearson's R against ERA5-Land
+(Fig. \ref{fig:tracking_R}a) and C3S COMBINED (Fig. \ref{fig:tracking_R}b).
+
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-ERA5_LAND.png}
+    \subcaption{ERA5-Land} % (a)
+\end{minipage}
+\begin{minipage}[c]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-C3S_combined.png}
+    \subcaption{C3S combined} % (b)
+\end{minipage}
+\caption{Pearson's R performance tracking of SMOS L2 against (a) ERA5-Land, and (b) C3S COMBINED.}
+\label{fig:tracking_R}
+\end{figure}
+
+
+\noindent The same is shown in terms of ubRMSD in Fig. \ref{fig:tracking_urmsd}.
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.png}
+    \subcaption{ERA5-Land} % (a)
+\end{minipage}
+\begin{minipage}[c]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-C3S_combined.png}
+    \subcaption{C3S combined} % (b)
+\end{minipage}
+\caption{ubRMSD performance tracking of SMOS L2 against (a) ERA5-Land, and (b) C3S COMBINED.}
+\label{fig:tracking_urmsd}
+\end{figure}

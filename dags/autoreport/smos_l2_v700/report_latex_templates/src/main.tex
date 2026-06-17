@@ -1,0 +1,117 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{csvsimple}
+\usepackage{wrapfig}
+\usepackage[
+    top=2cm,
+    bottom=2cm,
+    left=2.5cm,
+    right=2.5cm,
+    headheight=14pt
+]{geometry}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=blue,
+    citecolor=black,
+}
+\usepackage[authoryear]{natbib}
+\usepackage{lmodern}
+\usepackage{microtype}      % Better text justification and spacing
+\usepackage{import}  % add to preamble
+\usepackage{placeins}
+\usepackage{subcaption}
+\pagestyle{plain}
+
+\newcommand{\platformversion}{\detokenize{$<ReportVars['Common']['qa4sm_version']>$}}
+\newcommand{\reportfreq}{Monthly}
+\newcommand{\timecovered}{\detokenize{$<ReportVars['Common']['interval_days']>$} days (\detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$})}
+\newcommand{\otherreports}{\url{https://qa4sm.eu/ui/reports}}
+\newcommand{\website}{\detokenize{$<ReportVars['Common']['qa4sm_url']>$}}
+\newcommand{\contact}{\href{mailto:support@qa4sm.eu}{support@qa4sm.eu}}
+\newcommand{\manual}{\href{https://qa4sm.eu/api/user-manual}}
+
+% Document
+\begin{document}
+
+    \begin{center}
+    {\Large{QA4SM Automated Validation Report for}} \\
+    \vspace{2mm}
+    {\Huge{SMOS L2 (v700)}} \\
+    \vspace{1mm}
+    {\Large{Date of creation: \detokenize{$<ReportVars['Common']['compilation_date']>$}}}
+    \end{center}
+
+    \vspace{5mm}
+    \hrule
+    \vspace{1mm}
+    \hrule
+
+    \vspace{3mm}
+    \begin{tabular}{ll}
+    QA4SM version:                  & {\platformversion}   \\
+    Report frequency: 	            & {\reportfreq} \\
+    Temporal coverage:              & {\timecovered}  \\
+    Other reports in this series 	& {\otherreports}  \\
+    Website: 	                    & {\website}  \\
+    Contact: 	                    & {\contact}  \\
+    \end{tabular}
+
+    \vspace{3mm}
+    \hrule
+    \vspace{1mm}
+    \noindent Note: This report was generated automatically and may contain errors. In case of questions, please contact the platform maintainers via the provided support email address.
+    \vspace{1mm}
+    \hrule
+
+    \section{Report summary}
+
+    \noindent This report contains results from the following validation runs (validation runs are publicly available via the provided URL):
+
+    \begin{table}[h]
+    \centering
+    \csvreader[
+        separator=semicolon,
+        tabular=llll,
+        table head=\toprule Run & URL & Name & Completed \\ \midrule,
+        late after last line=\\\bottomrule
+    ]{val_run_list.csv}{}%
+    { \csvcoli & \csvcolii & \csvcoliii & \csvcoliv }
+    \caption{Validation runs included in this report}  % caption first
+    \label{tab:val_run_list}                           % label after caption
+    \end{table}
+
+
+    \begin{wrapfigure}{l}{0.2\textwidth}
+    \includegraphics[width=0.9\linewidth]{green.png}
+    \caption{General quality indicator}
+    \label{fig:indicator}
+    \end{wrapfigure}
+
+    This report comprises validation results for SMOS L2 v700 against ERA5-Land and C3S combined data.
+
+    \vspace{5mm} %5mm vertical space
+
+    \clearpage
+
+    %\input{auto_summary}
+    \import{./}{tracking.tex}
+    \clearpage % is also floatbarrier
+    \import{./}{datasets.tex}
+    \clearpage % is also floatbarrier
+    \import{./run1/}{run.tex}
+    \clearpage % is also floatbarrier
+    \import{./run2/}{run.tex}
+
+    \clearpage  % is also floatbarrier
+
+    \bibliographystyle{plainnat}
+    \bibliography{references.bib}
+
+\end{document}

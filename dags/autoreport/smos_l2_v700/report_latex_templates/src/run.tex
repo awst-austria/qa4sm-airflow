@@ -1,0 +1,128 @@
+% This template is used for all validation runs in the report (which can use different input datasets!)
+\section{Validation run \detokenize{$<ContentVars['report_run_index']>$}}
+
+Fig. \ref{fig:coverage\detokenize{$<ContentVars['report_run_index']>$}} shows the extent of validation
+run \detokenize{$<ContentVars['report_run_index']>$} (red bounding box).
+All statistics and plots in this chapter refer to the data from the shown bounding box.
+
+% A graphic created during the validation run data collection showing the
+% covered area is included.
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.6\textwidth]{"extent.png"}
+    \caption{Area covered by the validation runs. Min. lat.: \detokenize{$<ContentVars['ConfigVars']['min_lat']>$}. Max. lat.: \detokenize{$<ContentVars['ConfigVars']['max_lat']>$}. Min. lon.: \detokenize{$<ContentVars['ConfigVars']['min_lon']>$}. Max. lon.: \detokenize{$<ContentVars['ConfigVars']['max_lon']>$}}
+    \label{fig:coverage\detokenize{$<ContentVars['report_run_index']>$}}
+\end{figure}
+
+
+\subsection{Validation Settings}
+
+The following validation settings were used in the comparison against \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$}.
+For a full list of used settings, see the validation run results page linked in Table \ref{tab:val_run_list}.
+% Print a list of selected validation settings, information taken from the
+% collected content variables (validation config section).
+% This also shows some simple if-else logic in the f-string like placeholders.
+\begin{itemize}
+    \item Spatial reference: \textbf{\detokenize{$<ContentVars['ConfigVars']['spatial_reference']>$}}
+    \item Temporal reference: \textbf{\detokenize{$<ContentVars['ConfigVars']['temporal_reference']>$}}
+    \item Scaling reference: \textbf{\detokenize{$<ContentVars['ConfigVars']['scaling_reference']>$}}
+    \item Temporal matching window was set to \textbf{\detokenize{$<ContentVars['ConfigVars']['temporal_matching']>$} hours}.
+    \item Validation metrics \detokenize{$<'\\textbf{are}' if ContentVars['ConfigVars']['anomalies_method']!='none' else '\\textbf{are not}'>$} based on anomalies.
+    \item Triple collocation analysis \detokenize{$<'\\textbf{was}' if ContentVars['ConfigVars']['metrics'][0]['value'] else '\\textbf{was not}'>$} performed.
+\end{itemize}
+
+\subsection{Results}
+
+% Here we do some on-the-fly computation with numpy
+\noindent SMOS L2 was compared against \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$} at \detokenize{$<ContentVars['NetcdfVars']['n_gpis']>$} locations.
+
+\vspace{5mm}
+
+\noindent Table \ref{tab:sumstats\detokenize{$<ContentVars['report_run_index']>$}} shows summary statistics in terms of number of
+available observations / sample size for the metric computation ("\# Obs."), the correlation coefficient ("Pearson's R"),
+Bias (difference in means) and unbiased RMSD. Additional metrics can be found in the validation results \href{\detokenize{$<ContentVars['NetcdfMetaVars']['url']>$}}{online}.
+
+\begin{table}[htb!]
+    \centering
+    \caption{Summary statistics of SMOS L2 against \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$}.}
+    \label{tab:sumstats\detokenize{$<ContentVars['report_run_index']>$}}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Metric} & \textbf{\#Obs.} & \textbf{Pearson's R} & \textbf{Bias}  & \textbf{ubRMSD}  \\
+        \midrule
+        \textbf{Mean}   & \detokenize{$<ContentVars['SummaryVars']['MEAN_N. OBS.']>$}   & \detokenize{$<ContentVars['SummaryVars']['MEAN_PEARSON'S R']>$}     & \detokenize{$<ContentVars['SummaryVars']['MEAN_BIAS']>$}   & \detokenize{$<ContentVars['SummaryVars']['MEAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION']>$}   \\
+        \textbf{Median}   & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_N. OBS.']>$}   & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_PEARSON'S R']>$}     & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_BIAS']>$}   & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION']>$}   \\
+        \textbf{IQ-Range}   & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_N. OBS.']>$}   & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_PEARSON'S R']>$}     & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_BIAS']>$}   & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_UNBIASED ROOT-MEAN-SQUARE DEVIATION']>$}   \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\noindent For \detokenize{$<np.mean(ContentVars['NetcdfVars']['percent_ok']):.2f>$} \% of all attempted grid cells, validation metrics could be computed. For the remaining grid cells, an error occurred
+(compare Figure \ref{fig:status\detokenize{$<ContentVars['report_run_index']>$}}).
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_barplot_status_0-SMOS_L2_and_1-\detokenize{$<ContentVars['NetcdfMetaVars']['val_dc_dataset1']>$}.png}
+    \subcaption{} % (a)
+\end{minipage}
+\begin{minipage}[c]{0.6\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-SMOS_L2_and_1-\detokenize{$<ContentVars['NetcdfMetaVars']['val_dc_dataset1']>$}_status.png}
+    \subcaption{} % (b)
+\end{minipage}
+\caption{Number of successful test cases and errors raised (a), and their respective location (b) in the validation run against \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$}}
+\label{fig:status\detokenize{$<ContentVars['report_run_index']>$}}
+\end{figure}
+
+\noindent Validation metrics are computed from common observation time stamps between SMOS L2 and \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$}.
+A \detokenize{$<ContentVars['ConfigVars']['temporal_matching']>$}-hour temporal matching window is applied to each \detokenize{$<ContentVars['ConfigVars']['temporal_reference']>$} observation, to
+find a corresponding data point in \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$}. The resulting sample size to compute all validation metrics is shown in Figure
+\ref{fig:nobs\detokenize{$<ContentVars['report_run_index']>$}}.
+
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_boxplot_n_obs.png}
+    \subcaption{} % (a)
+\end{minipage}
+\begin{minipage}[c]{0.6\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_n_obs.png}
+    \subcaption{} % (b)
+\end{minipage}
+\caption{Validation sample size distribution (a), and by validation location (b) in the validation run against \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$}}
+\label{fig:nobs\detokenize{$<ContentVars['report_run_index']>$}}
+\end{figure}
+
+\noindent Figure \ref{fig:Rbox\detokenize{$<ContentVars['report_run_index']>$}} show the correlation coefficients (Pearson's R) (a, b) and
+p-values (c) between SMOS L2 and \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$} at all successfully tested locations.
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_boxplot_R.png}
+    \subcaption{} % (a)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-SMOS_L2_and_1-\detokenize{$<ContentVars['NetcdfMetaVars']['val_dc_dataset1']>$}_R.png}
+    \subcaption{} % (b)
+    \medskip
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-SMOS_L2_and_1-\detokenize{$<ContentVars['NetcdfMetaVars']['val_dc_dataset1']>$}_p_R.png}
+    \subcaption{} % (c)
+\end{minipage}
+\caption{Distribution of Pearson's R values across all locations (a),
+         spatial overview of Pearson's R (b) and corresponding p-values (c)
+         between common observations from SMOS L2 and
+         \detokenize{$<ContentVars['ConfigVars']['DS0']['name']>$}}
+\label{fig:Rbox\detokenize{$<ContentVars['report_run_index']>$}}
+\end{figure}
+
+
