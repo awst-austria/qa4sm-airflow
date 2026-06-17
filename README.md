@@ -42,3 +42,18 @@ send requests to the production API!). For this
 - start the qa4sm development instance with IP 0.0.0.0 (`python manage.py runserver 0.0.0.0:8000`)
 - in `qa4sm.env` enter `"172.17.0.1"` for `QA4SM_IP_OR_URL` and `"8000"` for `QA4SM_PORT_OR_NONE`.
 - the `QA4SM_API_TOKEN` is one that you created in your local develop instance.
+
+
+# DAGs
+
+## Data Update DAGs
+
+Contains the DAGs that update the datasets on the server. This includes downloading
+images from various online sources (FTP, CDS, etc.) and converting them to time
+series. Afterwards, the updated period is reported to QA4SM.
+
+## Autoreport DAGs
+
+Contains templates and code to run regular validations on the service and
+compile PDF reports from  the downloaded results. Uses the qa4sm-api python
+package and the qa4sm-autoreports package.
