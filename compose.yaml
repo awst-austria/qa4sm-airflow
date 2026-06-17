@@ -300,24 +300,24 @@ services:
         condition: service_completed_successfully
 
   # Any images used in DAGs should be added here, to verify they exist upons starting airflow
-#  airflow-dag-c3s:
-#    image: ${C3S_SM_DAG_IMAGE}
-#    pull_policy: always  #  images are pulled when launching the service.
-#  airflow-dag-smos:
-#    image: ${SMOS_DAG_IMAGE}
-#    pull_policy: always  #  images are pulled when launching the service.
-#  airflow-dag-era5land:
-#    image: ${ERA_DAG_IMAGE}
-#    pull_policy: always  #  images are pulled when launching the service.
-#  airflow-dag-era5:
-#    image: ${ERA_DAG_IMAGE}
-#    pull_policy: always  #  images are pulled when launching the service.
-#  airflow-dag-smap:
-#    image: ${SMAP_DAG_IMAGE}
-#    pull_policy: missing  #  images are pulled when launching the service.
-#  airflow-dag-ismn:
-#    image: ${ISMN_DAG_IMAGE}
-#    pull_policy: always  #  images are pulled when launching the service.
+  airflow-dag-c3s:
+    image: ${C3S_SM_DAG_IMAGE}
+    pull_policy: always  #  images are pulled when launching the service.
+  airflow-dag-smos:
+    image: ${SMOS_DAG_IMAGE}
+    pull_policy: always  #  images are pulled when launching the service.
+  airflow-dag-era5land:
+    image: ${ERA_DAG_IMAGE}
+    pull_policy: always  #  images are pulled when launching the service.
+  airflow-dag-era5:
+    image: ${ERA_DAG_IMAGE}
+    pull_policy: always  #  images are pulled when launching the service.
+  airflow-dag-smap:
+    image: ${SMAP_DAG_IMAGE}
+    pull_policy: missing  #  images are pulled when launching the service.
+  airflow-dag-ismn:
+    image: ${ISMN_DAG_IMAGE}
+    pull_policy: always  #  images are pulled when launching the service.
 
 volumes:
   postgres-db-volume:
