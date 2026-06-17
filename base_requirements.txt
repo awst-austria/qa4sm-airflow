@@ -1,6 +1,6 @@
-apache-airflow==2.9.2
-apache-airflow-providers-docker
-numpy
-pandas
-qa4sm-api
-git+https://github.com/awst-austria/qa4sm-autoreports@main
+"apache-airflow==2.9.2"
+"apache-airflow-providers-docker"
+"numpy"
+"pandas"
+"qa4sm-api">=0.2
+"qa4sm-autoreports>=0.1"
