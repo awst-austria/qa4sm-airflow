@@ -1,0 +1,89 @@
+\section{Datasets}
+
+The following chapter contains an overview of the datasets and the observational filters commonly applied across all validation runs in this report.
+\\[1em]
+\noindent The common period for all datasets is from \textbf{\detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$}}.
+Only measurements within this period are used for validation.
+
+\subsection{Candidate - \detokenize{$<Run1ContentVars['ConfigVars']['DS1']['name']>$} (\detokenize{$<Run1ContentVars['ConfigVars']['DS1']['version']>$}) Soil Moisture}
+
+\noindent The SMOS Level 2 (L2) Soil Moisture product is a global dataset of surface
+soil moisture (and related vegetation parameters) derived from ESA's SMOS satellite
+\citep{kerr2001}.
+SMOS carries a passive L-band microwave radiometer (MIRAS) that measures brightness
+temperatures emitted from the Earth's surface. Because the microwave signal at L-band
+is highly sensitive to the water content in the top few centimetres of soil, these
+measurements can be inverted to estimate volumetric soil moisture \citep{kerr1990,smosl2atbd}.
+The L2 product delivers this estimate at each node of a fixed global grid (the Discrete Global Grid,
+DGG), along with quality flags, retrieval diagnostics, and auxiliary outputs. It is
+intended for a wide range of applications including hydrology, meteorology, and climate
+research, though known limitations apply over dense forests, frozen/snow-covered soils,
+heavily urbanised areas, and regions with strong radio-frequency interference (RFI)
+\citep{smosl2atbd}.
+\\[1em]
+\noindent The L2 product is created through an iterative, physics-based retrieval
+algorithm that takes the L1c brightness temperature observations as input and fits them
+to a forward radiative-transfer model \citep{kerr2012}. For each DGG node, the algorithm first
+pre-processes the L1c views~--- filtering for quality and RFI, computing incidence
+angles, and co-locating a range of auxiliary data (land cover, ECMWF meteorological
+fields, LAI, soil texture, etc.) on a fine sub-grid. A decision tree then classifies
+the scene (vegetated soil, open water, snow, frozen soil, urban, etc.) and selects the
+appropriate forward model \citep{kerr2012}. An iterative minimisation (Levenberg--Marquardt) is run to
+find the values of soil moisture and vegetation opacity that best fit the observed
+multi-angular, dual-polarisation brightness temperatures \citep{smosl2atbd}.
+\\[1em]
+\noindent The following list contains all data filters applied to \detokenize{$<Run1ContentVars['ConfigVars']['DS1']['name']>$}
+before any metrics are computed.
+
+For a detailed description and threshold values for each filter, see the validation run online.
+
+\begin{itemize}
+\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run1ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------------------
+
+\subsection{Reference Data 1 -- ERA5-Land (\detokenize{$<Run2ContentVars['ConfigVars']['DS0']['version']>$}) Surface SM}
+
+\noindent ERA5-Land \citep{munozsabater2021}, produced by ECMWF, is a global reanalysis available from 1950 to present.
+It provides surface variables with an increased spatial resolution compared to ERA5 \citep{hersbach2020}.
+Soil Moisture in ERA5-Land is available in 1-hour intervals on an approx. 9 km grid and without temporal gaps
+at four depth layers (at 0-7 cm depth, 7-28 cm, 28-100 cm, and 100-289 cm).
+\\[1em]
+Here we use ERA5-Land data in the above-mentioned validation period extracted at hours 0, 6, 12, and 18 of each day at 0–7 cm depth.
+Soil temperature information from the same layer is used to mask observations before validation
+(when $T < 0$ °C) to eliminate the potential impact of remaining outliers in the satellite data at the transition
+from liquid to frozen soil moisture. ERA5-Land data are available as a preliminary release (ERA5-Land T) with a delay
+of only a few days.
+\\[1em]
+The data are then evaluated and finally released with a delay of approximately two months from the current date.
+Only the final version of the data is currently used in QA4SM.
+\\[1em]
+\noindent The top-layer soil moisture field of ERA5-Land is compared to SMOS L2.
+The following filters are applied to ERA5-Land before it is temporally matched to SMOS L2 to compute the validation metrics:
+
+\begin{itemize}
+\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run2ContentVars['ConfigVars']['DS0']['basic_filters_description']])>$}
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------------------
+
+\subsection{Reference Data 2 -- C3S Satellite SM (COMBINED) (\detokenize{$<Run1ContentVars['ConfigVars']['DS0']['version']>$}) Soil Moisture}
+
+\noindent C3S SM is a merged multi-satellite soil moisture record spanning the period from 1978 to present day. The dataset
+harmonizes and combines the observations from currently 19 active (radar) and passive (radiometer) sensors into a single,
+consistent long-term record.
+\\[1em]
+Satellite soil moisture measurements are representative of the first 3-5 centimeters of soil -- depending on the wavelength
+used for retrieval, which varies between sensors merged in C3S SM. Data are retrieved at an approximately 25 km spatial
+resolution at daily temporal sampling (containing both day- and nighttime retrievals).
+\\[1em]
+C3S provides regular temporal extensions of the satellite soil moisture time series as Intermediate Climate Data Records (ICDRs).
+These usually lag behind present day by 10-20 days.
+\\[1em]
+The surface soil moisture variable ("sm") of C3S SM is used in the comparison to C3S SM. The following filters are applied to
+C3S SM before it is temporally matched to SMOS L2 to compute the validation metrics:
+
+\begin{itemize}
+\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run1ContentVars['ConfigVars']['DS0']['basic_filters_description']])>$}
+\end{itemize}
