@@ -41,11 +41,11 @@ All versions are added to the list. The dag itself can be
 (de)activated in the GUI afterwards
 """
 DAG_SETUP = {
-    'v202212': {
-        'img_path': "/qa4sm/data/C3S_combined/C3S_V202212-ext/images/",
-        'ts_path': "/qa4sm/data/C3S_combined/C3S_V202212-ext/timeseries/",
-        'ext_start_date': "2022-01-01",
-        'qa4sm_dataset_id': "45",
+    'v202505': {
+        'img_path': "/qa4sm/data/C3S_combined/C3S_V202505-ext/images/",
+        'ts_path': "/qa4sm/data/C3S_combined/C3S_V202505-ext/timeseries/",
+        'ext_start_date': "2025-01-01",
+        'qa4sm_dataset_id': "70",
     },
     'v202312': {
         'img_path': "/qa4sm/data/C3S_combined/C3S_V202312-ext/images/",
