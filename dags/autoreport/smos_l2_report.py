@@ -169,10 +169,11 @@ def _stage_new_report(**context):
             'interval_from': interval_from,
             'interval_to': interval_to,
             # todo: delete later in in prod
-            "min_lat": 35.0,
-            "min_lon": -10.0,
-            "max_lat": 66.0,
-            "max_lon": 40.0,
+            # 112.763672,-42.875964,154.423828,-10.660608
+            "min_lat": -45,
+            "min_lon": 110,
+            "max_lat": -10,
+            "max_lon": 155,
         },
         instance=QA4SM_INSTANCE,
         token=QA4SM_TOKEN,
@@ -349,8 +350,8 @@ def _collect_and_compile(**context):
 with DAG(
         "SMOS_L2-v700-Autoreport",
         default_args={
-            "depends_on_past": False,
-            "email": ["support@qa4sm.eu"],
+            "depends_on_past": True,
+            "email": ["wolfgang.preimesberger@geo.tuwien.ac.at"],
             "email_on_failure": EMAIL_ON_FAILURE,
             "email_on_retry": EMAIL_ON_FAILURE,
             "retries": 3,
@@ -358,8 +359,8 @@ with DAG(
         },
         description="Create SMOS L2 validation report",
         schedule="0 0 1 * *",  # 1st of each month
-        start_date=datetime(2025, 1, 1),
-        end_date=datetime(2025, 12, 31),   # todo: delete in prod
+        start_date=datetime(2024, 1, 1),
+        end_date=datetime(2024, 12, 31),   # todo: delete in prod
         catchup=True,
         max_active_runs=1,
         tags=["smos_l2", "v700", "autoreport"],
@@ -404,7 +405,7 @@ with DAG(
         task_id="wait_for_data",
         python_callable=_sense_data_available,
         poke_interval=60 * 60 * 24,        # check every 24 hours
-        timeout=60 * 60 * 24 * 90,         # FIX #7: was * 60 (60 days), now * 90 (90 days)
+        timeout=60 * 60 * 24 * 90,
         mode="reschedule",                 # frees up worker slot while waiting
         doc="Wait for the data to be available in the service. "
             "This can take up to 12 weeks; we check once per day and continue "
@@ -420,9 +421,9 @@ with DAG(
     )
 
     wait_for_validation = PythonSensor(
-        task_id="wait_for_validation",     # FIX #2: was duplicate "wait_for_data"
+        task_id="wait_for_validation",
         python_callable=_sense_runs_finished,
-        poke_interval=60 * 1,         # check every hour, todo: change from minute to hour 60 * 60 * 1
+        poke_interval=60 * 60 * 1,         # check every hour
         timeout=60 * 60 * 24 * 5,          # give up after 5 days
         mode="reschedule",                 # frees up worker slot while waiting
         doc="Wait for the validation runs triggered on the server to finish. "
