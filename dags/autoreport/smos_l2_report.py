@@ -168,10 +168,11 @@ def _stage_new_report(**context):
         override_params={
             'interval_from': interval_from,
             'interval_to': interval_to,
-            # "min_lat": -45,
-            # "min_lon": 110,
-            # "max_lat": -10,
-            # "max_lon": 155,
+            # todo: delete
+            "min_lat": -45,
+            "min_lon": 110,
+            "max_lat": -10,
+            "max_lon": 155,
         },
         instance=QA4SM_INSTANCE,
         token=QA4SM_TOKEN,
