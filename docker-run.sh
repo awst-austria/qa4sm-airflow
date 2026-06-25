@@ -7,21 +7,21 @@
 
 export AIRFLOW_VERSION=2.9.2
 
-setup=$1
+setupuser=$1
 
 # This contains access tokens and must be added manually
 #source qa4sm.env
 
-if [ "$setup" = "" ]; then
+if [ "$setupuser" = "" ]; then
   echo "You have to pick a user."
   exit 1
 fi
 
 
-echo "Setting up DEVELOPMENT Setup, User = $setup"
-export AIRFLOW_USER=$setup
+echo "Setting up DEVELOPMENT Setup, User = $setupuser"
+export AIRFLOW_USER=$setupuser
 
-USER_ID=$(id -u $USER)
+USER_ID=$(id -u $AIRFLOW_USER)
 if [ "$USER_ID" = 0 ]; then
     echo "Don't run this script with sudo!"
     exit 1

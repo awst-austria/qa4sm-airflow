@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 
 def load_qa4sm_dotenv():
-    dotenv = os.path.join(os.path.dirname(__file__), '..', 'qa4sm.env')
+    dotenv = os.path.join(os.path.dirname(__file__), '..', '.env')
     if os.path.isfile(dotenv):
         load_dotenv(dotenv)
 
