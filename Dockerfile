@@ -1,4 +1,3 @@
-# make sure that the versions here match with the environment.yml and base_requirements.txt
 FROM apache/airflow:2.9.2-python3.12
 USER root
 RUN apt-get update \

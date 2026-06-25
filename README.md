@@ -5,11 +5,13 @@ This repository contains the configuration to set up the task scheduler for
 
 1) Make sure that the file `qa4sm.env` which contains the environment variables
    required by some of the DAGs to access different data sources etc. is available
-   in the same directory as the `docker-run.sh` script
-2) To start all necessary container, call the `docker-run.sh` script. Starting
-   the service should pull the 'latest' available versions of DAG containers 
-   (`airflow-dag-XXX` with `pull_policy: always` in `compose.yaml`).
+   in the same directory as the `docker-run.sh` script (don't track it with GIT).
+2) To start all necessary container, call the `docker-run.sh` script (the user ID
+will be used by docker, e.g., `bash docker-run.sh wpreimes`). 
+The service should pull the airflow containers and DAG images as indicated in the 
+environment file (`airflow-dag-XXX` with `pull_policy: always` in `compose.yaml`).
 3) After a few seconds the airflow service should run on port 8085 (localhost:8085).
+4) To stop and clean up the container run `bash docker-stop.sh`.
 
 ## Setup
 This setup will build/launch multiple images/containers. See the `compose.yml` setup.
