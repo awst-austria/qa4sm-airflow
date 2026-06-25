@@ -22,7 +22,7 @@ from misc import (
 # - Configure URL, token, path etc for different instances?
 # - Could split dag for separate image and TS updates?
 
-load_qa4sm_dotenv()  # environment variables loaded from qa4sm.env file
+load_qa4sm_dotenv()  # environment variables loaded from .env file (based on qa4sm.env)
 IMAGE = os.environ["C3S_SM_DAG_IMAGE"]
 QA4SM_IP_OR_URL = os.environ["QA4SM_IP_OR_URL"]
 QA4SM_PORT_OR_NONE = os.environ["QA4SM_PORT_OR_NONE"]
