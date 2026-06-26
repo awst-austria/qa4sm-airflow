@@ -393,6 +393,7 @@ with DAG(
     is_processing_required_branch = BranchPythonOperator(
         task_id="is_processing_required_branch",
         python_callable=_is_processing_required_branch,
+        trigger_rule="none_failed_min_one_success",
         doc="The report was staged, but the results might not be processed yet. "
             "Check if processing is required (to trigger the validation runs "
             "afterwards), or if they were already triggered (to check if the "
@@ -432,6 +433,7 @@ with DAG(
     is_compiling_required_branch = BranchPythonOperator(
         task_id="is_compiling_required_branch",
         python_callable=_is_compiling_required_branch,
+        trigger_rule="none_failed_min_one_success",
         doc="The validation runs are done. Check if the report still needs to "
             "be compiled or was already compiled in a previous attempt."
     )
@@ -445,6 +447,7 @@ with DAG(
 
     finish = EmptyOperator(
         task_id="finish",
+        trigger_rule="none_failed_min_one_success",
         doc="No-op terminal task to close the DAG run cleanly.",
     )
 
