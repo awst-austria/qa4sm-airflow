@@ -169,10 +169,10 @@ def _stage_new_report(**context):
             'interval_from': interval_from,
             'interval_to': interval_to,
             # todo: delete
-            "min_lat": -45,
-            "min_lon": 110,
-            "max_lat": -10,
-            "max_lon": 155,
+            # "min_lat": -45,
+            # "min_lon": 110,
+            # "max_lat": -10,
+            # "max_lon": 155,
         },
         instance=QA4SM_INSTANCE,
         token=QA4SM_TOKEN,
@@ -358,7 +358,7 @@ with DAG(
         },
         description="Create SMOS L2 validation report",
         schedule="0 0 1 * *",  # 1st of each month
-        start_date=datetime(2025, 1, 1),
+        start_date=datetime(2024, 1, 1),
         catchup=True,
         max_active_runs=1,
         tags=["smos_l2", "v700", "autoreport"],
