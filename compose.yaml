@@ -307,7 +307,7 @@ services:
     image: ${SMOS_DAG_IMAGE}
     pull_policy: missing  #  images are pulled when launching the service.
   airflow-dag-era5land:
-    image: ${ERA_DAG_IMAGE}co
+    image: ${ERA_DAG_IMAGE}
     pull_policy: missing  #  images are pulled when launching the service.
   airflow-dag-era5:
     image: ${ERA_DAG_IMAGE}
