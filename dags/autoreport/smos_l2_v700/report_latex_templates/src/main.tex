@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 
 % Packages
+\usepackage[printonlyused]{acronym}
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{graphicx}
@@ -27,15 +28,19 @@
 \usepackage{import}  % add to preamble
 \usepackage{placeins}
 \usepackage{subcaption}
+\usepackage{xcolor}
 \pagestyle{plain}
+\usepackage{tikz}   % To draw circles
 
 \newcommand{\platformversion}{\detokenize{$<ReportVars['Common']['qa4sm_version']>$}}
 \newcommand{\reportfreq}{Monthly}
 \newcommand{\timecovered}{\detokenize{$<ReportVars['Common']['interval_days']>$} days (\detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$})}
-\newcommand{\otherreports}{\url{https://qa4sm.eu/ui/reports}}
-\newcommand{\website}{\detokenize{$<ReportVars['Common']['qa4sm_url']>$}}
-\newcommand{\contact}{\href{mailto:support@qa4sm.eu}{support@qa4sm.eu}}
-\newcommand{\manual}{\href{https://qa4sm.eu/api/user-manual}}
+\newcommand{\otherreportsui}{https://qa4sm.eu/ui/reports}
+\newcommand{\seriesfolder}{\detokenize{$<ReportVars['Common']['series_name'].replace('_', '\_')>$}}
+\newcommand{\otherreportsapi}{https://qa4sm.eu/api/autoreports/\seriesfolder}
+\newcommand{\reportname}{\detokenize{$<ReportVars['Common']['report_name']>$}}
+\newcommand{\reportfilename}{\detokenize{$<ReportVars['Common']['filename'].replace('_', '\_')>$}}
+
 
 % Document
 \begin{document}
@@ -57,57 +62,117 @@
     \begin{tabular}{ll}
     QA4SM version:                  & {\platformversion}   \\
     Report frequency: 	            & {\reportfreq} \\
-    Temporal coverage:              & {\timecovered}  \\
-    Other reports in this series 	& {\otherreports}  \\
-    Website: 	                    & {\website}  \\
-    Contact: 	                    & {\contact}  \\
+    Period covered:                 & {\timecovered}  \\
+    Access reports in this series: 	& {\url{\otherreportsapi}}  \\
+    Contact: 	                    & {\href{mailto:support@qa4sm.eu}{support@qa4sm.eu}}  \\
     \end{tabular}
 
     \vspace{3mm}
     \hrule
-    \vspace{1mm}
-    \noindent Note: This report was generated automatically and may contain errors. In case of questions, please contact the platform maintainers via the provided support email address.
-    \vspace{1mm}
+    \vspace{2mm}
+    \noindent Note: This report was generated automatically and may contain errors. In case of questions, please contact the provided support email address. For a detailed description of all functionality in QA4SM, please see the \href{https://qa4sm.eu/api/user-manual}{User Manual}.
+    \vspace{2mm}
     \hrule
 
-    \section{Report summary}
+    \subsection*{How to cite:}
+    \begin{center}
+    \fbox{
+      \parbox{0.90\textwidth}{\raggedright
+        QA4SM (\detokenize{$<ReportVars['Common']['compilation_date'].split('-')[0]>$}). \textit{SMOS L2 (v700) Automated Validation Report for the period \detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$}}. SMOS L2 (v700) Validation Report Series, Available online: \url{\otherreportsapi/\reportfilename}
+      }
+    }
+    \end{center}
 
-    \noindent This report contains results from the following validation runs (validation runs are publicly available via the provided URL):
+    \section{Report summary} \label{sec:summary}
+
+    \noindent This report contains results from the following validation runs (validation runs are publicly available at the linked URLs):
 
     \begin{table}[h]
     \centering
     \csvreader[
         separator=semicolon,
-        tabular=llll,
-        table head=\toprule Run & URL & Name & Completed \\ \midrule,
+        tabular=lll,
+        table head=\toprule Name & ID/URL & Completed \\ \midrule,
         late after last line=\\\bottomrule
     ]{val_run_list.csv}{}%
-    { \csvcoli & \csvcolii & \csvcoliii & \csvcoliv }
+    { \csvcoliii & \csvcolii & \csvcoliv }
     \caption{Validation runs included in this report}  % caption first
     \label{tab:val_run_list}                           % label after caption
     \end{table}
 
+    \hrule
 
-    \begin{wrapfigure}{l}{0.2\textwidth}
-    \includegraphics[width=0.9\linewidth]{green.png}
-    \caption{General quality indicator}
-    \label{fig:indicator}
+    %\vspace{2mm}
+
+    \begin{wrapfigure}{l}{0.25\textwidth}
+        \centering
+        \includegraphics[width=0.6\linewidth]{\detokenize{$<ReportVars['Common']['traffic_light']>$}.png}
+        \caption{General performance indicator}
+        \label{fig:indicator}
     \end{wrapfigure}
 
-    This report comprises validation results for SMOS L2 v700 against ERA5-Land and C3S combined data.
+    \vspace{3mm}
 
-    \vspace{5mm} %5mm vertical space
+    \noindent This report comprises validation results for SMOS L2 v700 satellite soil moisture against ERA5-Land reanalysis and ISMN in situ data.
+
+    \vspace{5mm}
+
+    \noindent \textbf{Overall Tracking Quality Indicator:} Chapter \ref{sec:tracking} tracks selected metrics between SMOS L2
+    and reference data sets across reports in this series to detect unexpected changes in the SMOS L2 Soil Moisture data
+    quality. Fig. \ref{fig:indicator} combines these results. A \textcolor{green}{green} light means that \textit{all}
+    tracked metrics for this report were found to be within the expected thresholds, \textcolor{orange}{yellow} means that
+    in some cases the target thresholds were not met, and \textcolor{red}{red} means that in \textit{all} cases performance metrics were
+    outside the expected bounds.
+    No color means that no tracking was performed.
+    The report filename appendix (G, Y, R, N) also refers to this indicator.
 
     \clearpage
 
-    %\input{auto_summary}
+    \normalsize \tableofcontents
+
+    \clearpage
+
     \import{./}{tracking.tex}
     \clearpage % is also floatbarrier
     \import{./}{datasets.tex}
     \clearpage % is also floatbarrier
-    \import{./run1/}{run.tex}
+
+    \section{Validation Runs}
+
+    This section contains validation results of validation runs between \ac{SMOS} \ac{L2} and different reference data sets.
+
+    \noindent The bounding box in Fig. \ref{fig:common_extent} shows the common validation extent that applies to all validation results from the following chapters.
+
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=.8\textwidth]{common_extent.png}
+        \caption{Area covered by the validation runs (red bounding box). Min. lat.: \detokenize{$<ReportVars['Common']['common_area']['min_lat']>$}°. Max. lat.: \detokenize{$<ReportVars['Common']['common_area']['max_lat']>$}°. Min. lon.: \detokenize{$<ReportVars['Common']['common_area']['min_lon']>$}°. Max. lon.: \detokenize{$<ReportVars['Common']['common_area']['max_lon']>$}°.}
+        \label{fig:common_extent}
+    \end{figure}
+
+    \import{./SMOS L2 (v700) \reportname\space Run1/}{run1.tex}
     \clearpage % is also floatbarrier
-    \import{./run2/}{run.tex}
+    \import{./SMOS L2 (v700) \reportname\space Run2/}{run2.tex}
+    \clearpage  % is also floatbarrier
+    \appendix
+    \import{./}{appendix.tex}
+    \clearpage  % is also floatbarrier
+
+    \section*{List of Acronyms}
+    \begin{acronym}
+    \acro{C3S}{Copernicus Climate Change Service}
+    \acro{ECMWF}{European Centre for Medium-Range Weather Forecasts}
+    \acro{FRMs}{Fiducial Reference Measurements}
+    \acro{ISEA}{Icosahedral Snyder Equal Area}
+    \acro{ISMN}{International Soil Moisture Network}
+    \acro{L2}{Level 2}
+    \acro{LAI}{Leaf Area Index}
+    \acro{MIRAS}{Microwave Imaging Radiometer using Aperture Synthesis}
+    \acro{NRT}{Near Real Time}
+    \acro{RFI}{Radio-Frequency Interference}
+    \acro{SMOS}{Soil Moisture and Ocean Salinity}
+    \acro{ubRMSD}{Unbiased Root Mean Square Difference}
+    \end{acronym}
 
     \clearpage  % is also floatbarrier
 

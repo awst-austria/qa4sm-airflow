@@ -4,6 +4,7 @@ It will download new image data from FTP, update time series in the qa4sm
 datastore as far as image data is available and send the updated time series
 period through the API to the DB.
 """
+import pandas as pd
 from airflow.operators.python import (
     PythonOperator,
     BranchPythonOperator)
@@ -20,6 +21,7 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 import calendar
 from misc import load_qa4sm_dotenv
+from qa4sm_autoreports.data import Data
 
 load_qa4sm_dotenv()
 
@@ -163,20 +165,24 @@ def _stage_new_report(**context):
     connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
     series = AutoReportSeries(series_root=series_root, connection=connection)
 
-    series.new_report(
+    report = series.new_report(
         report_name, config_path,
         override_params={
             'interval_from': interval_from,
             'interval_to': interval_to,
             # todo: delete
-            # "min_lat": -45,
-            # "min_lon": 110,
-            # "max_lat": -10,
-            # "max_lon": 155,
+            # "min_lat": 32,
+            # "min_lon": -121,
+            # "max_lat": 39,
+            # "max_lon": -115,
         },
         instance=QA4SM_INSTANCE,
         token=QA4SM_TOKEN,
     )
+
+    report.restructure_runs({'run1': f"SMOS L2 (v700) {report_name} Run1",
+                             'run2': f"SMOS L2 (v700) {report_name} Run2"})
+
     logger.info("[%s] Staging complete", report_name)
 
 
@@ -306,6 +312,7 @@ def _collect_and_compile(**context):
     from qa4sm_autoreports import Connection
     from qa4sm_autoreports.series import AutoReportSeries
 
+    n_epochs = 15
     report_name, _, _ = _get_report_name(**context)
     logger.info("[%s] Starting collect and compile", report_name)
     connection = Connection(QA4SM_INSTANCE, token=QA4SM_TOKEN, quiet_login=True)
@@ -315,27 +322,84 @@ def _collect_and_compile(**context):
     series[report_name].collect_content()
 
     metrics = [
-        ('urmsd_between_0-SMOS_L2_and_1-C3S_combined', 'm³m⁻³', None),
-        ('urmsd_between_0-SMOS_L2_and_1-ERA5_LAND',    'm³m⁻³', None),
-        ('R_between_0-SMOS_L2_and_1-C3S_combined',     '-',     'p_R_between_0-SMOS_L2_and_1-C3S_combined'),
-        ('R_between_0-SMOS_L2_and_1-ERA5_LAND',        '-',     'p_R_between_0-SMOS_L2_and_1-ERA5_LAND'),
+        ('R_between_0-SMOS_L2_and_1-ERA5_LAND', '-', 'p_R_between_0-SMOS_L2_and_1-ERA5_LAND', 0.01),
+        ('urmsd_between_0-SMOS_L2_and_1-ERA5_LAND', 'm³m⁻³', None, 0.01),
+        ('R_between_0-ISMN_and_1-SMOS_L2', '-', 'p_R_between_0-ISMN_and_1-SMOS_L2', 0.01),
+        ('urmsd_between_0-ISMN_and_1-SMOS_L2', 'm³m⁻³', None, 0.01),
     ]
-    for metric, unit, p_mask in metrics:
+    tracking_status = []
+    report_data = {}
+
+    for metric, unit, p_mask, alpha in metrics:
         logger.info("[%s] Tracking metric: %s", report_name, metric)
+        logger.info("p_mask", p_mask)
+        logger.info("alpha", alpha)
+
         kwargs = dict(
             metric=metric, unit=unit,
-            ref_epoch=report_name, n_epochs=12,
+            ref_epoch=report_name, n_epochs=n_epochs,
             path_out=series[report_name].report_root / "tracking",
+            corridor_alpha=alpha,
         )
         if metric.startswith('R_'):
             kwargs['pretty_name'] = 'R'
             kwargs['p_mask_var'] = p_mask
         series.track_metric(**kwargs)
 
-    logger.info("[%s] Compiling PDF report", report_name)
-    series[report_name].compile(template_path=latex_templ_path, tex_ignore=None)
+        data = Data().from_yml(series[report_name].report_root / "tracking" / f"tracking_{metric}.yml")
+        report_data[f"Tracking {metric}"] = data.data
 
-    dest = report_collection / f"{report_name}.pdf"
+        if alpha is not None:
+            tracking_status.append(data.data['tracking']['tracking_status'])
+        else:
+            tracking_status.append("none")
+
+
+    tracking_status_not_none = [v for v in tracking_status if v != "none"]
+
+    if not tracking_status_not_none:
+        # every entry is "none"
+        traffic_light = "none"
+    elif all(v == "ok" for v in tracking_status_not_none):
+        # every non-none entry is "ok"
+        traffic_light = "green"
+    elif all(v == "not ok" for v in tracking_status_not_none):
+        # every non-none entry is "not ok"
+        traffic_light = "red"
+    elif any(v == "not ok" for v in tracking_status_not_none):
+        # mixed: at least one "not ok", but not all of them
+        traffic_light = "yellow"
+    else:
+        # shouldn't happen given only "ok"/"not ok"/"none" values
+        traffic_light = "none"
+
+    logger.info("Traffic Light", traffic_light)
+    logger.info("[%s] Compiling PDF report", report_name)
+
+
+    report_date = f"{pd.to_datetime(report_name).to_pydatetime().strftime("%Y%m%d")}"
+    compilation_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+    _d = compilation_date.replace("-",'').replace(' ', '').replace(":", '')
+    filename = f"{report_date}_{_d}_{traffic_light[0].upper()}.pdf"
+
+    series[report_name].collect_content(
+        report_variables={
+            'traffic_light': traffic_light,
+            'series_name': series.name,
+            'report_name': report_name,
+            'compilation_date': str(compilation_date),
+            'filename': filename,
+            'n_epochs': n_epochs
+        },
+        report_data=report_data,
+    )
+
+    series[report_name].compile(
+        template_path=latex_templ_path,
+        run_tex=['run1.tex', 'run2.tex'],
+        tex_ignore=None)
+
+    dest = report_collection / f"{filename}.pdf"
     logger.info("[%s] Copying PDF to %s", report_name, dest)
     shutil.copy(
         series[report_name].report_root / 'pdf_report' / 'main.pdf',

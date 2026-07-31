@@ -1,0 +1,95 @@
+\section{Appendix}
+
+\subsection{Tracking Stats}
+
+\begin{table}[htb]
+\centering
+\csvreader[
+    separator=semicolon,
+    tabular=l r r r r r r r l,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    late after last line=\\\bottomrule
+]{./tracking/stats_R_between_0-SMOS_L2_and_1-ERA5_LAND.csv}{}%
+{\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
+\caption{Statistics (quantiles and statistical moments) across previous reports tracking R between SMOS L2 and ERA5-Land. Also shown in Fig. \ref{fig:tracking_R_E5L}.}
+\label{tab:stats_tracking_R_E5L}
+\end{table}
+
+
+\begin{table}[htb]
+\centering
+\csvreader[
+    separator=semicolon,
+    tabular=l r r r r r r r l,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    late after last line=\\\bottomrule
+]{./tracking/stats_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.csv}{}%
+{\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
+\caption{Statistics (quantiles and statistical moments) across previous reports tracking ubRMSD between SMOS L2 and ERA5-Land. Also shown in Fig. \ref{fig:tracking_urmsd_E5L}.}
+\label{tab:stats_tracking_urmsd_E5L}
+\end{table}
+
+
+\begin{table}[htb]
+\centering
+\csvreader[
+    separator=semicolon,
+    tabular=l r r r r r r r l,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    late after last line=\\\bottomrule
+]{./tracking/stats_R_between_0-ISMN_and_1-SMOS_L2.csv}{}%
+{\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
+\caption{Statistics (quantiles and statistical moments) across previous reports tracking R between SMOS L2 and ISMN. Also shown in Fig. \ref{fig:tracking_R_ISMN}.}
+\label{tab:stats_tracking_R_ISMN}
+\end{table}
+
+
+\begin{table}[htb]
+\centering
+\csvreader[
+    separator=semicolon,
+    tabular=l r r r r r r r l,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    late after last line=\\\bottomrule
+]{./tracking/stats_urmsd_between_0-ISMN_and_1-SMOS_L2.csv}{}%
+{\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
+\caption{Statistics (quantiles and statistical moments) across previous reports tracking ubRMSD between SMOS L2 and ISMN. Also shown in Fig. \ref{fig:tracking_urmsd_ISMN}.}
+\label{tab:stats_tracking_urmsd_ISMN}
+\end{table}
+
+\FloatBarrier
+
+
+\subsection{ISMN networks}
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+Network     & Reference \\ \midrule
+ARM         & \cite{Cook2016a,Cook2016b,Cook2018} \\
+Berlin      & We acknowledge the work of Martin Schreiner and the Berlin network team \\
+            & in support of the ISMN \\
+BFG\_Nw     & We acknowledge the work of Jens Wilhelmi in support of the ISMN \\
+DWD         & We acknowledge the work of the DWD and its agrometeorological team for \\
+            & their contributions in support of the ISMN \\
+FMI         & \cite{Ikonen2016,Ikonen2018} \\
+ROMPS       & \cite{Zech2020} \\
+RSMN        & We acknowledge the work of Andrei Diamandi and Adelina Mihai and the \\
+            & Romanian National Meteorological Administration team in support of the ISMN \\
+SCAN        & \cite{Schaefer2007} \\
+SNOTEL      & \cite{Leavesley2008} \\
+SOILSCAPE   & \cite{Shuman2010,Moghaddam2011,Moghaddam2016} \\
+TERENO      & \cite{Bogena2012,Bogena2016,Bogena2018} \\
+USCRN       & \cite{Bell2013} \\
+WEGENERNET  & \cite{Kirchengast2014,Fuchsberger2021} \\
+XMS-CAT     & We acknowledge the work of Agnès Lladós and Lola Boquera as well as the \\
+            & XMS-CAT network team in support of the ISMN. \\
+            &           \\ \bottomrule
+\end{tabular}
+\caption{\ac{ISMN} \ac{NRT} networks used in this report.}
+\label{tab:ismn_refs}
+\end{table}
+
+
+

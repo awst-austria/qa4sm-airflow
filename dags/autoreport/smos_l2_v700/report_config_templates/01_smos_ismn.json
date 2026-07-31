@@ -1,11 +1,11 @@
 {
-  "name_tag": "SMOS L2 vs C3S SM",
+  "name_tag": "SMOS L2 vs ISMN NRT",
   "interval_from": "9999-01-01",
   "interval_to": "9999-12-31",
-  "temporal_matching": 24,
+  "temporal_matching": 1,
   "anomalies_method": "none",
-  "anomalies_from": "1990-01-01",
-  "anomalies_to": "2020-12-30",
+  "anomalies_from": null,
+  "anomalies_to": null,
   "min_lat": -90.0,
   "min_lon": -180.0,
   "max_lat": 90.0,
@@ -32,32 +32,20 @@
   },
   "dataset_configs": [
     {
-      "dataset_id": 1,
-      "version_id": 70,
-      "variable_id": 1,
-      "is_spatial_reference": false,
-      "is_temporal_reference": false,
-      "is_scaling_reference": false,
-      "basic_filters": [
-        1
-      ],
-      "parametrised_filters": []
-    },
-    {
       "dataset_id": 15,
       "version_id": 39,
       "variable_id": 19,
-      "is_spatial_reference": true,
+      "is_spatial_reference": false,
       "is_temporal_reference": true,
       "is_scaling_reference": false,
       "basic_filters": [
-        1,
         37,
         38,
         39,
         40,
         41,
-        42
+        42,
+        1
       ],
       "parametrised_filters": [
         {
@@ -65,8 +53,32 @@
           "parameters": "0.05"
         }
       ]
+    },
+    {
+      "dataset_id": 4,
+      "version_id": 80,
+      "variable_id": 4,
+      "is_spatial_reference": true,
+      "is_temporal_reference": false,
+      "is_scaling_reference": false,
+      "basic_filters": [
+        1,
+        2,
+        43
+      ],
+      "parametrised_filters": [
+        {
+          "id": 18,
+          "parameters": "XMS-CAT,CW3E,SCAN,SNOTEL,SOILSCAPE,USCRN,Berlin,WEGENERNET,ROMPS,ARM,BFG_Nw,DWD,FMI,RSMN,TERENO"
+        },
+        {
+          "id": 24,
+          "parameters": "0.00,0.10"
+        }
+      ]
     }
   ],
+  "val_type": "temporal",
   "settings_changes": {
     "filters": [],
     "anomalies": false,

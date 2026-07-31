@@ -39,6 +39,8 @@ cat qa4sm.env >> .env
 # Maybe pull them from dockerhub or geo.gitlab
 # Maybe build them
 
+docker logout ghcr.io > /dev/null 2>&1 || true
+
 # start all necessary containers
 docker compose --verbose up --detach airflow-init
 docker compose --verbose up --detach

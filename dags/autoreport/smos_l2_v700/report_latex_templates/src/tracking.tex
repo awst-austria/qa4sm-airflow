@@ -1,45 +1,82 @@
-\section{Performance Tracking}
+\section{Performance Tracking} \label{sec:tracking}
 
-The performance of SMOS L2 is tracked against the two reference datasets (ERA5-Land and C3S combined)
-in terms of ubRMSD and Pearson's R. Performance tracking considers results from the latest 12 validation epochs.
-To ensure samples that are large enough to compute the metrics, data from the last 3 months is used
-(via a rolling window), meaning that there is a 2-month overlap between adjacent epochs.
+The performance of \ac{SMOS} \ac{L2} data is tracked against the two reference datasets -- ERA5-Land and \ac{ISMN} -- in terms of \ac{ubRMSD} and Pearson's R across all successfully tested locations (compare Figs. \ref{fig:status1} and \ref{fig:status2} in the later chapters).
+To ensure sufficiently large temporal samples for computing the metrics, each report uses data selected via a rolling window from the 3 months prior to its effective date (shown along the x-axis), for all datasets.
+A 2-month overlap between the data points from adjacent reports is therefore expected.
 
-Figure \ref{fig:tracking_R} tracks the performance of SMOS L2 in terms of Pearson's R against ERA5-Land
-(Fig. \ref{fig:tracking_R}a) and C3S COMBINED (Fig. \ref{fig:tracking_R}b).
+Performance tracking considers validation results from the latest \detokenize{$<ReportVars['Common']['n_epochs']>$} reports to estimate the expected value range.
+The medians from previous reports are used to fit a normal distribution; the 1st and 99th percentiles define the lower and upper bounds of the expected value range used to detect outlier epochs.
+The metric median value for the current report is expected fall within this range.
+Otherwise, a warning will be raised (see Chapter \ref{ssec:tracking_summary}).
 
+\subsection{ISMN \ac{FRMs}}
 
-\begin{figure}[ht!]
-\centering
-\begin{minipage}[c]{0.4\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-ERA5_LAND.png}
-    \subcaption{ERA5-Land} % (a)
-\end{minipage}
-\begin{minipage}[c]{0.4\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-C3S_combined.png}
-    \subcaption{C3S combined} % (b)
-\end{minipage}
-\caption{Pearson's R performance tracking of SMOS L2 against (a) ERA5-Land, and (b) C3S COMBINED.}
-\label{fig:tracking_R}
-\end{figure}
-
-
-\noindent The same is shown in terms of ubRMSD in Fig. \ref{fig:tracking_urmsd}.
+Fig. \ref{fig:tracking_R_ISMN} tracks the performance of \ac{SMOS} \ac{L2} in terms of Pearson's R against \ac{ISMN} \ac{NRT} measurements.
+The used \ac{ISMN} data -- \ac{FRMs} in particular -- are described in Chapter \ref{ssec:ismn}.
+Fig. \ref{fig:tracking_R_ISMN} and Appendix Table \ref{tab:stats_tracking_R_ISMN} show the tracking statistics for the last \detokenize{$<ReportVars['Common']['n_epochs']>$} reports, along with the resulting expected median range derived from them.
 
 \begin{figure}[ht!]
-\centering
-\begin{minipage}[c]{0.4\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.png}
-    \subcaption{ERA5-Land} % (a)
-\end{minipage}
-\begin{minipage}[c]{0.4\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-C3S_combined.png}
-    \subcaption{C3S combined} % (b)
-\end{minipage}
-\caption{ubRMSD performance tracking of SMOS L2 against (a) ERA5-Land, and (b) C3S COMBINED.}
-\label{fig:tracking_urmsd}
+    \includegraphics[width=0.7\textwidth]{./tracking/tracking_R_between_0-ISMN_and_1-SMOS_L2.png}
+    \caption{Cross-report tracking of correlation scores between \ac{SMOS} \ac{L2} and \ac{ISMN} \ac{NRT} networks.}
+    \label{fig:tracking_R_ISMN}
 \end{figure}
+
+The \ac{ubRMSD} against ISMN is tracked in the same way (Fig. \ref{fig:tracking_urmsd_ISMN}).
+All related statistics from the plot are listed in Appendix Table \ref{tab:stats_tracking_urmsd_E5L}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./tracking/tracking_urmsd_between_0-ISMN_and_1-SMOS_L2.png}
+    \caption{Cross-report tracking of ubRMSD scores between \ac{SMOS} \ac{L2} and \ac{ISMN} soil moisture.}
+    \label{fig:tracking_urmsd_ISMN}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{ERA5-Land}
+
+Performance tracking is also performed against ERA5-Land reanalysis soil moisture fields.
+For a detailed description of the used ERA5-Land data, see Chapter \ref{ssec:era5land}.
+The corresponding statistics are listed in Appendix Table \ref{tab:stats_tracking_R_E5L}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-ERA5_LAND.png}
+    \caption{Cross-report tracking of correlation scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
+    \label{fig:tracking_R_E5L}
+\end{figure}
+
+Accordingly, Fig. \ref{fig:tracking_urmsd_E5L} and Appendix Table \ref{tab:stats_tracking_urmsd_E5L} show the \ac{ubRMSD} tracking statistics between \ac{SMOS} \ac{L2} and ERA5-Land soil moisture.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.png}
+    \caption{Cross-report tracking of ubRMSD scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
+    \label{fig:tracking_urmsd_E5L}
+\end{figure}
+
+\FloatBarrier
+
+
+% ----------------------------------------------------------------------------------------------------------------------
+
+\subsection{Tracking summary} \label{ssec:tracking_summary}
+
+Table \ref{tab:tracking_status} summarizes the tracking results of \ac{SMOS} \ac{L2} with respect to the chosen reference datasets and performance metrics for this report from the previous chapter.
+The general quality indicator for this report in Fig. \ref{fig:indicator} (described in Chapter \ref{sec:summary}) is a combination of the indicators from Table \ref{tab:tracking_status}.
+
+\newcommand{\circlemark}[1]{\begin{tikzpicture}\draw[fill=#1] (0,0) circle (0.25cm);\end{tikzpicture}}
+
+\begin{table}[h]
+\centering
+\caption{Performance indicators for individually tracked metrics. \textcolor{green}{Green} indicates performance within the expected bounds, \textcolor{red}{red} indicates performance outside the expected bounds, and \textcolor{gray}{gray} indicates no classification.}
+\begin{tabular}{@{}lcccc@{}}
+     & \multicolumn{2}{c}{ISMN} & \multicolumn{2}{c}{ERA5-Land} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+     & R & ubRMSD & R & ubRMSD \\ \midrule
+Report \reportname & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['tracking_color']>$}} \\
+\bottomrule
+\end{tabular}
+\label{tab:tracking_status}
+\end{table}
