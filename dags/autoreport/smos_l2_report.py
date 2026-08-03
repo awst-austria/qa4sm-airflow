@@ -228,6 +228,7 @@ def _is_compiling_required_branch(**context) -> str:
     """
     from qa4sm_autoreports import Connection
     from qa4sm_autoreports.series import AutoReportSeries
+    from qa4sm_autoreports.utils import ValidationReportError
 
     report_name, _, _ = _get_report_name(**context)
     logger.info("[%s] Checking if compiling is required", report_name)
@@ -240,9 +241,15 @@ def _is_compiling_required_branch(**context) -> str:
     if status in [2, 3]:
         logger.info("[%s] → branching to: collect_and_compile", report_name)
         return 'collect_and_compile'
-    else:
+    elif status == 4:
         logger.info("[%s] → branching to: finish (already compiled)", report_name)
         return 'finish'
+    else:
+        raise ValidationReportError(
+            f"[{report_name}] Unexpected status {status} in "
+            f"is_compiling_required_branch; validations not finished, "
+            f"cannot skip to finish."
+        )
 
 
 def _start_validation_runs(**context):
@@ -399,7 +406,7 @@ def _collect_and_compile(**context):
         run_tex=['run1.tex', 'run2.tex'],
         tex_ignore=None)
 
-    dest = report_collection / f"{filename}.pdf"
+    dest = report_collection / filename
     logger.info("[%s] Copying PDF to %s", report_name, dest)
     shutil.copy(
         series[report_name].report_root / 'pdf_report' / 'main.pdf',
