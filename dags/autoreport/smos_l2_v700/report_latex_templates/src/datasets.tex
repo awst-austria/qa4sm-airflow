@@ -96,9 +96,5 @@ A list of the networks used is given in the filter list below.
 \detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run1ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
 \end{itemize}
 \vspace{1em}
-\noindent The following \textit{parameterised} filters were activated with the indicated parameter values:
-\begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']} (value: {Run2ContentVars['ConfigVars']['DS1']['parametrised_filters'][i]['parameters']})" for i, d in enumerate(Run2ContentVars['ConfigVars']['DS1']['parametrised_filters_description'])])>$}
-\end{itemize}
 
 A list of references and acknowledgements for all used ISMN networks is given in Appendix Table \ref{tab:ismn_refs}.
