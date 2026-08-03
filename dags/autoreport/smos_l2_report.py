@@ -496,6 +496,7 @@ with DAG(
         poke_interval=60 * 60 * 1,         # check every hour
         timeout=60 * 60 * 24 * 5,          # give up after 5 days
         mode="reschedule",                 # frees up worker slot while waiting
+        trigger_rule="none_failed_min_one_success",
         doc="Wait for the validation runs triggered on the server to finish. "
             "Normally takes a few hours, but large runs (e.g. SMOS vs ERA5-Land) "
             "may take a few days."
