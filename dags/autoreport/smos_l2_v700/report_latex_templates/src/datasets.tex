@@ -71,7 +71,7 @@ All filters are applied \textit{before} temporal matching with \ac{SMOS} \ac{L2}
 
 \subsection{Reference 2 -- ISMN in situ measurements (\detokenize{$<Run1ContentVars['ConfigVars']['DS1']['version']>$}) Soil Moisture} \label{ssec:ismn}
 
-\noindent The \ac{ISMN} \citep{dorigo2021} is a global collection of publicly available in situ soil moisture measurements from operational and historic networks and validation campaigns\footnote{available for download after registration at \url{https://ismn.earth}}.
+\noindent The \ac{ISMN} \citep{dorigo2021} is a global, public collection of in situ soil moisture measurements from operational and historic networks and measurement campaigns\footnote{available for download after registration at \url{https://ismn.earth}}.
 The \ac{ISMN} collects, harmonizes and publishes ground measurements of soil moisture and related geophysical variables from various network maintainers across the globe.
 Data within the \ac{ISMN} are subject to quality controls and provided with quality flags \citep{dorigo2013}.
 The quality controls include an assessment against a plausible range of important meteorological variables, which is applied equally to all datasets.
@@ -87,14 +87,13 @@ An option to exclusively use \ac{FRMs} for a validation run is available via QA4
 QA4SM hosts multiple downloaded snapshots of the full \ac{ISMN} archive.
 The version used in this report is \detokenize{$<Run1ContentVars['ConfigVars']['DS1']['version']>$}.
 \ac{NRT} networks in this version are regularly updated in QA4SM and are the only networks used in this report for comparison with \ac{SMOS} \ac{L2}, i.e., non-NRT networks are currently not used.
-A list of the networks used is given in the filter list below.
 
 \subsection{Data filters}
 
-\noindent The following \textit{binary} filters were activated:
+\noindent The following \textit{binary} filters were activated for ISMN:
 \begin{itemize}
 \detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run1ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
 \end{itemize}
 \vspace{1em}
 
-A list of references and acknowledgements for all used ISMN networks is given in Appendix Table \ref{tab:ismn_refs}.
+\noindent A list of references and acknowledgements for all used ISMN networks is given in Appendix Table \ref{tab:ismn_refs}.
