@@ -58,7 +58,7 @@ Only this final version of the data is currently used in QA4SM.
 For the validation of \ac{SMOS} \ac{L2}, we use soil moisture from the top layer of ERA5-Land (0–7 cm).
 Soil temperature information for the same layer is used to mask observations before validation (when $T < 0$ °C) to eliminate the potential impact of remaining outliers in the satellite data at the transition from liquid to frozen soil moisture.
 
-\subsection{Data filters}
+\subsubsection{Data filters}
 
 The following lists contains all (\textit{binary}) data filters applied to ERA5-Land during validation runs from this report.
 All filters are applied \textit{before} temporal matching with \ac{SMOS} \ac{L2} and computation of quality metrics.
@@ -88,7 +88,7 @@ QA4SM hosts multiple downloaded snapshots of the full \ac{ISMN} archive.
 The version used in this report is \detokenize{$<Run1ContentVars['ConfigVars']['DS1']['version']>$}.
 \ac{NRT} networks in this version are regularly updated in QA4SM and are the only networks used in this report for comparison with \ac{SMOS} \ac{L2}, i.e., non-NRT networks are currently not used.
 
-\subsection{Data filters}
+\subsubsection{Data filters}
 
 \noindent The following \textit{binary} filters were activated for ISMN:
 \begin{itemize}
