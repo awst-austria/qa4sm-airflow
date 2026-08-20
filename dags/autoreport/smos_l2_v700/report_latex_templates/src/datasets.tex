@@ -28,13 +28,13 @@ Therefore, a range of data filters is implemented in QA4SM.
 
 \subsubsection{Data filters}
 
-The following lists contains all data filters applied to \detokenize{$<Run1ContentVars['ConfigVars']['DS1']['name']>$} during validation runs from this report.
+The following lists contains all data filters applied to \detokenize{$<Run2ContentVars['ConfigVars']['DS1']['name']>$} during validation runs from this report.
 All filters are applied \textit{before} quality metrics are computed.
 For a detailed description and threshold values for each filter, see the validation runs online (link to results in Table \ref{tab:val_run_list}) and the \href{https://qa4sm.eu/api/user-manual}{QA4SM User Manual}.
 
 \noindent The following \textit{binary} filters were activated:
 \begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run1ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
+\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run2ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
 \end{itemize}
 \vspace{1em}
 \noindent The following \textit{parameterised} filters were activated with the indicated threshold set:
