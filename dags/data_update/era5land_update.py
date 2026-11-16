@@ -113,7 +113,7 @@ for version, dag_settings in DAG_SETUP.items():
             },
             description="Update ERA image data",
             schedule=timedelta(weeks=1),
-            start_date=datetime(2024, 10, 28),
+            start_date=datetime(2026, 10, 1),
             catchup=False,  # avoid duplicate processing
             tags=["era", "download", "reshuffle", "update"],
     ) as dag:

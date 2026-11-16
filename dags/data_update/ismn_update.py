@@ -101,7 +101,7 @@ for version, dag_settings in DAG_SETUP.items():
             },
             description="Update ISMN image data",
             schedule=timedelta(weeks=1),
-            start_date=datetime(2026, 5, 1),
+            start_date=datetime(2026, 10, 1),
             catchup=False,  # don't repeat missed runs!
             tags=["ismn", "download", "update"],
     ) as dag:

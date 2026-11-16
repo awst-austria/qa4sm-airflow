@@ -121,7 +121,7 @@ for version, dag_settings in DAG_SETUP.items():
             },
             description="Update C3S SM image data",
             schedule=timedelta(weeks=1),
-            start_date=datetime(2024, 12, 2),
+            start_date=datetime(2026, 10, 1),
             catchup=False,  # avoid duplicate processing
             tags=["c3s_sm", "download"],
     ) as dag:
