@@ -57,6 +57,32 @@
 \label{tab:stats_tracking_urmsd_E5L}
 \end{table}
 
+\begin{table}[htb]
+\centering
+\csvreader[
+    separator=semicolon,
+    tabular=l r r r r r r r l,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    late after last line=\\\bottomrule
+]{./tracking/stats_R_between_0-SMOS_L2_and_1-SMAP_L3.csv}{}%
+{\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
+\caption{Statistics (quantiles and statistical moments) across previous reports tracking R between SMOS L2 and SMAP L3. Also shown in Fig. \ref{fig:tracking_R_SMAP}.}
+\label{tab:stats_tracking_R_SMAP}
+\end{table}
+
+
+\begin{table}[htb]
+\centering
+\csvreader[
+    separator=semicolon,
+    tabular=l r r r r r r r l,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    late after last line=\\\bottomrule
+]{./tracking/stats_urmsd_between_0-SMOS_L2_and_1-SMAP_L3.csv}{}%
+{\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
+\caption{Statistics (quantiles and statistical moments) across previous reports tracking ubRMSD between SMOS L2 and SMAP L3. Also shown in Fig. \ref{fig:tracking_urmsd_SMAP}.}
+\label{tab:stats_tracking_urmsd_SMAP}
+\end{table}
 
 \FloatBarrier
 

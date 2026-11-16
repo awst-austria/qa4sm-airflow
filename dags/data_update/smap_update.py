@@ -235,15 +235,17 @@ for version, dag_settings in DAG_SETUP.items():
         # Optional: Initial extension TS
         # ---------------------------------------
         _task_id = "extend_ts"
-        # VARS = "soil_moisture,soil_moisture_error,retrieval_qual_flag,freeze_thaw_fraction,surface_flag,surface_temperature,vegetation_opacity,vegetation_water_content,landcover_class,static_water_body_fraction,tb_time_seconds"
-        # _command = f"""bash -c '[ "$(ls -A {os.path.join(ts_path, '*.nc')})] && smap_l3 update_ts {ts_path} {img_path} || smap_l3 reshuffle --overpass BOTH --var_overpass_str True --time_key tb_time_seconds {img_path} {ts_path}  {VARS} '"""
-        # VARS = "soil_moisture,soil_moisture_error,retrieval_qual_flag,freeze_thaw_fraction,surface_flag,surface_temperature,vegetation_opacity,vegetation_water_content,landcover_class,static_water_body_fraction,tb_time_seconds"
-        #
-        # _command = f"""bash -c "[ \"$(ls -A {os.path.join(ts_path, '*.nc')})\" ] && smap_l3 update_ts {ts_path} {img_path} || smap_l3 reshuffle --overpass BOTH --var_overpass_str True --time_key tb_time_seconds {img_path} {ts_path} '{VARS}' " """
         VARS = "soil_moisture,soil_moisture_error,retrieval_qual_flag,freeze_thaw_fraction,surface_flag,surface_temperature,vegetation_opacity,vegetation_water_content,landcover_class,static_water_body_fraction,tb_time_seconds"
 
-        _command = f"""bash -c '[ "$(ls -A {os.path.join(ts_path, '*.nc')})" ] && smap_l3 update_ts {ts_path} {img_path} || """ \
-                f"""smap_l3 reshuffle --overpass BOTH --var_overpass_str True --time_key tb_time_seconds {img_path} {ts_path} {VARS}' """
+        # NOTE: `smap_l3 update_ts` takes IMG_PATH first, then TS_PATH.
+        # Use if/else (not `A && B || C`): with `&&/||` a FAILING update
+        # falls through to a full reshuffle, which appends the whole period
+        # again to the existing files (this caused duplicates to stack up).
+        _command = (
+            f"""bash -c 'if ls {os.path.join(ts_path, '[0-9]*.nc')} >/dev/null 2>&1; """
+            f"""then smap_l3 update_ts {img_path} {ts_path}; """
+            f"""else smap_l3 reshuffle --overpass BOTH --var_overpass_str True --time_key tb_time_seconds {img_path} {ts_path} {VARS}; fi' """
+        )
 
         _doc = f"""
         Creates new time series, or appends new data in time series format.

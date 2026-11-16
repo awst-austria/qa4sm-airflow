@@ -97,3 +97,34 @@ The version used in this report is \detokenize{$<Run1ContentVars['ConfigVars']['
 \vspace{1em}
 
 \noindent A list of references and acknowledgements for all used ISMN networks is given in Appendix Table \ref{tab:ismn_refs}.
+
+% ---------------------------------------------------------------------------------------------------------------------
+
+\subsection{Reference 3 -- SMAP (\detokenize{$<Run3ContentVars['ConfigVars']['DS1']['version']>$}) Soil Moisture} \label{ssec:smap}
+
+\noindent \ac{SMAP} and \ac{SMOS} are comparable instruments with similar target applications. Both missions
+are designed to measure soil moisture in the top soil layer using passive microwave radiometry.
+Both systems operate in the L-band of the electromagnetic spectrum, which allows them to
+estimate the moisture content of soils even under vegetation cover.
+\\[1em]
+There are, however, some known differences between the two systems. ESA's \ac{SMOS} mission was launched
+5 years before NASA's \ac{SMAP}, so the \ac{SMOS} time series is significantly longer. On the other hand, \ac{SMOS}
+is known to be affected by \ac{RFI} in certain parts of the world (e.g.\ China, the Middle East, Ukraine and Russia).
+For the NASA mission, a technology to mitigate the impact of \ac{RFI} on the retrievals was therefore developed, making
+\ac{SMAP} significantly more robust to \ac{RFI}. In addition, \ac{SMAP} was originally also equipped with a radar for active measurements.
+However, the radar failed shortly after launch and is therefore not used in operational data retrieval.
+\\[1em]
+Like the data from all operational satellite missions, \ac{SMAP} data are regularly reprocessed. QA4SM hosts multiple versions of the \ac{L3} dataset.
+The latest available version is used for the comparison with \ac{SMOS}; for this report, this is \detokenize{$<Run3ContentVars['ConfigVars']['DS1']['version']>$}.
+
+\subsubsection{Data filters}
+
+\noindent The following \textit{binary} filters were activated for \ac{SMAP}:
+\begin{itemize}
+\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run3ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
+\end{itemize}
+\vspace{1em}
+\noindent The following \textit{parameterised} filters were activated with the indicated threshold set:
+\begin{itemize}
+\detokenize{$<'.'.join([f"\\item {d['description']} (threshold: {Run3ContentVars['ConfigVars']['DS1']['parametrised_filters'][i]['parameters']})" for i, d in enumerate(Run3ContentVars['ConfigVars']['DS1']['parametrised_filters_description'])])>$}
+\end{itemize}

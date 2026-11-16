@@ -215,8 +215,8 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Optional: Initial extension TS ---------------------------------------
         _task_id = "extend_ts"
-        _command = f"""bash -c '[ "$(ls -A {os.path.join(ts_path, '*.nc')})" ] && era5 update_ts {ts_path} --imgpath {img_path} || """ \
-                   f"""era5 reshuffle {img_path} {ts_path} -s {ext_start_date} --land_points True --imgbuffer 25'"""
+        _command = f"""bash -c 'if [ "$(ls -A {os.path.join(ts_path, '*.nc')})" ]; then era5 update_ts {ts_path} --imgpath {img_path}; else """ \
+                   f"""era5 reshuffle {img_path} {ts_path} -s {ext_start_date} --land_points True --imgbuffer 25; fi'"""
         _doc = f"""
         Creates new time series, or appends new data in time series format.
         """

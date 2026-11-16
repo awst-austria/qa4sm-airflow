@@ -59,6 +59,31 @@ Accordingly, Fig. \ref{fig:tracking_urmsd_E5L} and Appendix Table \ref{tab:stats
 \FloatBarrier
 
 
+\subsection{SMAP}
+
+Performance tracking of SMOS L2 compares soil moisture retrievals against SMAP during days where both missions have overlapping swaths.
+While both missions have similar characteristics, they are independent of each other, making them ideal candidates for cross-validation.
+
+For a detailed description of the used SMAP data, see Chapter \ref{ssec:smap}.
+The corresponding statistics are listed in Appendix Table \ref{tab:stats_tracking_R_SMAP}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-SMAP_L3.png}
+    \caption{Cross-report tracking of correlation scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
+    \label{fig:tracking_R_E5L}
+\end{figure}
+
+Accordingly, Fig. \ref{fig:tracking_urmsd_E5L} and Appendix Table \ref{tab:stats_tracking_urmsd_E5L} show the \ac{ubRMSD} tracking statistics between \ac{SMOS} \ac{L2} and ERA5-Land soil moisture.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.png}
+    \caption{Cross-report tracking of ubRMSD scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
+    \label{fig:tracking_urmsd_E5L}
+\end{figure}
+
+\FloatBarrier
 % ----------------------------------------------------------------------------------------------------------------------
 
 \subsection{Tracking summary} \label{ssec:tracking_summary}

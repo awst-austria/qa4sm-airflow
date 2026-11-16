@@ -86,6 +86,8 @@ x-airflow-common:
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
+    docker-proxy:
+      condition: service_started
     redis:
       condition: service_healthy
     postgres:
@@ -98,8 +100,11 @@ services:
   docker-proxy:
     image: alpine/socat:1.8.0.0
     command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
-    ports:
-      - "2375:2375"
+    restart: always
+    # Only reachable from containers on the compose network. Do NOT publish this
+    # port on the host: it is an unauthenticated Docker API (= root on the host).
+    expose:
+      - 2375
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 

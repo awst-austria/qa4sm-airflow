@@ -221,9 +221,9 @@ for version, dag_settings in DAG_SETUP.items():
 
         # Optional: Update TS --------------------------------------------------
         _task_id = "extend_ts"
-        _command = f"""bash -c '[ "$(ls -A {os.path.join(ts_path, '*.nc')})" ] && """ \
-                   f"""c3s_sm update_ts {img_path} {ts_path} || """ \
-                   f"""c3s_sm reshuffle {img_path} {ts_path} --land True --imgbuffer 100'"""
+        _command = f"""bash -c 'if [ "$(ls -A {os.path.join(ts_path, '*.nc')})" ]; then """ \
+                   f"""c3s_sm update_ts {img_path} {ts_path}; else """ \
+                   f"""c3s_sm reshuffle {img_path} {ts_path} --land True --imgbuffer 100; fi'"""
         _doc = f"""
         Only runs when a update is required.
         Get the current time range, the date of the first new image, 
