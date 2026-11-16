@@ -5,7 +5,7 @@
 #
 # Based on https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html
 
-export AIRFLOW_VERSION=2.9.2
+export AIRFLOW_VERSION=3.4.0
 
 setupuser=$1
 

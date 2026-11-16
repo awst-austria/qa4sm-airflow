@@ -1,4 +1,4 @@
-FROM apache/airflow:2.9.2-python3.12
+FROM apache/airflow:3.4.0-python3.12
 USER root
 RUN apt-get update \
   && apt-get install -y --no-install-recommends vim texlive-full git \

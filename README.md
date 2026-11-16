@@ -13,6 +13,17 @@ environment file (`airflow-dag-XXX` with `pull_policy: always` in `compose.yaml`
 3) After a few seconds the airflow service should run on port 8085 (localhost:8085).
 4) To stop and clean up the container run `bash docker-stop.sh`.
 
+## Upgrading from the Airflow 2 setup
+The setup is based on Airflow 3 (see `Dockerfile` / `base_requirements.txt`).
+Airflow 3 no longer supports PostgreSQL 13, so the metadata DB runs on
+postgres:16 with a new, empty volume (`postgres16-db-volume`). The DAG run
+history of the Airflow 2 setup is not carried over: the autoreport DAG
+(`catchup=True`) will therefore process all months since its `start_date` (2025-01) again.
+The old volume (`<project>_postgres-db-volume`) is not used anymore and can be
+removed with `docker volume rm` once the new setup runs.
+
+The web UI is now served by the `airflow-apiserver` container (still on port 8085).
+
 ## Setup
 This setup will build/launch multiple images/containers. See the `compose.yml` setup.
 

@@ -1,6 +1,10 @@
-apache-airflow==2.9.2
+apache-airflow==3.4.0
 apache-airflow-providers-docker
+apache-airflow-providers-standard
+apache-airflow-providers-smtp
+apache-airflow-providers-fab
 numpy
 pandas
+python-dotenv
 qa4sm-api>=0.2
 qa4sm-autoreports>=0.2

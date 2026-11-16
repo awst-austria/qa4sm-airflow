@@ -4,10 +4,11 @@ It will download new image data from FTP, update time series in the qa4sm
 datastore as far as image data is available and send the updated time series
 period through the API to the DB.
 """
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.operators.bash import BashOperator
-from airflow.providers.docker.operators.docker import DockerOperator, Mount
-from airflow.models.dag import DAG
+from airflow.providers.standard.operators.python import PythonOperator, BranchPythonOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.docker.operators.docker import DockerOperator
+from docker.types import Mount
+from airflow.sdk import DAG
 from datetime import datetime, timedelta
 import yaml
 import os
@@ -104,7 +105,6 @@ for version, dag_settings in DAG_SETUP.items():
             f"SMOS_L2-{version}-Processing",
             default_args={
                 "depends_on_past": False,
-                "catchup": False,
                 "email": ["support@qa4sm.eu"],
                 "email_on_failure": EMAIL_ON_FAILURE,
                 "email_on_retry": False,

@@ -1,7 +1,8 @@
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.operators.bash import BashOperator
-from airflow.providers.docker.operators.docker import DockerOperator, Mount
-from airflow.models.dag import DAG
+from airflow.providers.standard.operators.python import PythonOperator, BranchPythonOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.docker.operators.docker import DockerOperator
+from docker.types import Mount
+from airflow.sdk import DAG
 from datetime import datetime, timedelta
 
 import yaml

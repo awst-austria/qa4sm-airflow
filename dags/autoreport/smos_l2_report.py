@@ -5,12 +5,13 @@ datastore as far as image data is available and send the updated time series
 period through the API to the DB.
 """
 import pandas as pd
-from airflow.operators.python import (
+from airflow.providers.standard.operators.python import (
     PythonOperator,
     BranchPythonOperator)
-from airflow.sensors.python import PythonSensor
-from airflow.models.dag import DAG
-from airflow.operators.empty import EmptyOperator
+from airflow.providers.standard.sensors.python import PythonSensor
+from airflow.sdk import DAG
+from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.timetables.interval import CronDataIntervalTimetable
 
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -56,7 +57,10 @@ def _get_report_name(**context) -> tuple[str, str, str]:
     Derive report_name, interval_from and interval_to from the logical_date
     of the current DAG run.
     """
-    report_date = context["logical_date"].date().replace(day=1)
+    # In Airflow 3, manually triggered runs may have no logical_date; fall back
+    # to the time the run was triggered (same as Airflow 2 behaviour).
+    logical_date = context.get("logical_date") or context["dag_run"].run_after
+    report_date = logical_date.date().replace(day=1)
     interval_from, interval_to = period_for_report(str(report_date), period_months=3)
     report_name = f"{interval_to}"
     return report_name, interval_from, interval_to
@@ -442,8 +446,12 @@ with DAG(
             "retry_delay": timedelta(hours=3),
         },
         description="Create SMOS L2 validation report",
-        schedule="0 0 1 * *",  # 1st of each month
-        start_date=datetime(2024, 1, 1),
+        # 1st of each month. Airflow 3 interprets plain cron strings with
+        # CronTriggerTimetable (logical_date = trigger time). We explicitly keep
+        # the Airflow 2 data-interval semantics (logical_date = start of the
+        # previous month), because the report period is derived from it.
+        schedule=CronDataIntervalTimetable("0 0 1 * *", timezone="UTC"),
+        start_date=datetime(2025, 1, 1),
         catchup=True,
         max_active_runs=1,
         tags=["smos_l2", "v700", "autoreport"],
