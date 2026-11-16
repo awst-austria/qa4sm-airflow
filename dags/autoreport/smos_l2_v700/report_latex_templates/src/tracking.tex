@@ -1,107 +1,140 @@
-\section{Performance Tracking} \label{sec:tracking}
+\section{Performance tracking} \label{sec:tracking}
 
-The performance of \ac{SMOS} \ac{L2} data is tracked against the two reference datasets -- ERA5-Land and \ac{ISMN} -- in terms of \ac{ubRMSD} and Pearson's R across all successfully tested locations (compare Figs. \ref{fig:status1} and \ref{fig:status2} in the later chapters).
-To ensure sufficiently large temporal samples for computing the metrics, each report uses data selected via a rolling window from the 3 months prior to its effective date (shown along the x-axis), for all datasets.
-A 2-month overlap between the data points from adjacent reports is therefore expected.
+\noindent This chapter tracks the agreement of \ac{SMOS} \ac{L2} with three reference datasets -- \ac{ISMN} in situ \ac{FRMs}, ERA5-Land and \ac{SMAP} \ac{L3} (Chapter \ref{sec:datasets}) -- across the reports in this series, to detect unexpected changes in the \ac{SMOS} \ac{L2} data quality.
+Two metrics are tracked: Pearson's R (only significant correlations, $p \leq$ \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['p_mask_thres']>$}) and the \ac{ubRMSD}.
+Each report uses a 3-month window that ends with the month before the report date; consecutive monthly reports therefore share 2 months of data, and their results are not independent.
+\\[1em]
+\noindent\textbf{Expected range:} For each metric, the medians across all locations from up to \detokenize{$<ReportVars['Common']['n_epochs'] - 1>$} previous reports are used to fit a normal distribution.
+The \detokenize{$<format(ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['alpha'] * 100, 'g')>$}\,\% and \detokenize{$<format(100 - ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['alpha'] * 100, 'g')>$}\,\% quantiles of this distribution define the expected range for the median of the current report.
+A median outside this range is flagged (\textcolor{red}{red}).
+At least \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['min_history']>$} previous reports are required to derive an expected range; otherwise the metric is not classified (\textcolor{gray}{gray}).
+\\[1em]
+\noindent\textbf{Change at common locations:} The median across all locations also depends on \textit{which} locations are included, which can change between reports.
+Therefore, the median change of the metric at the locations shared with the previous report is given in addition ($\Delta$ prev.).
+It is informative only and does not affect the tracking status.
 
-Performance tracking considers validation results from the latest \detokenize{$<ReportVars['Common']['n_epochs']>$} reports to estimate the expected value range.
-The medians from previous reports are used to fit a normal distribution; the 1st and 99th percentiles define the lower and upper bounds of the expected value range used to detect outlier epochs.
-The metric median value for the current report is expected fall within this range.
-Otherwise, a warning will be raised (see Chapter \ref{ssec:tracking_summary}).
-
-\subsection{ISMN \ac{FRMs}}
-
-Fig. \ref{fig:tracking_R_ISMN} tracks the performance of \ac{SMOS} \ac{L2} in terms of Pearson's R against \ac{ISMN} \ac{NRT} measurements.
-The used \ac{ISMN} data -- \ac{FRMs} in particular -- are described in Chapter \ref{ssec:ismn}.
-Fig. \ref{fig:tracking_R_ISMN} and Appendix Table \ref{tab:stats_tracking_R_ISMN} show the tracking statistics for the last \detokenize{$<ReportVars['Common']['n_epochs']>$} reports, along with the resulting expected median range derived from them.
-
-\begin{figure}[ht!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{./tracking/tracking_R_between_0-ISMN_and_1-SMOS_L2.png}
-    \caption{Cross-report tracking of correlation scores between \ac{SMOS} \ac{L2} and \ac{ISMN} \ac{NRT} networks.}
-    \label{fig:tracking_R_ISMN}
-\end{figure}
-
-The \ac{ubRMSD} against ISMN is tracked in the same way (Fig. \ref{fig:tracking_urmsd_ISMN}).
-All related statistics from the plot are listed in Appendix Table \ref{tab:stats_tracking_urmsd_E5L}.
-
-\begin{figure}[ht!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{./tracking/tracking_urmsd_between_0-ISMN_and_1-SMOS_L2.png}
-    \caption{Cross-report tracking of ubRMSD scores between \ac{SMOS} \ac{L2} and \ac{ISMN} soil moisture.}
-    \label{fig:tracking_urmsd_ISMN}
-\end{figure}
-
-\FloatBarrier
-
-\subsection{ERA5-Land}
-
-Performance tracking is also performed against ERA5-Land reanalysis soil moisture fields.
-For a detailed description of the used ERA5-Land data, see Chapter \ref{ssec:era5land}.
-The corresponding statistics are listed in Appendix Table \ref{tab:stats_tracking_R_E5L}.
-
-\begin{figure}[ht!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-ERA5_LAND.png}
-    \caption{Cross-report tracking of correlation scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
-    \label{fig:tracking_R_E5L}
-\end{figure}
-
-Accordingly, Fig. \ref{fig:tracking_urmsd_E5L} and Appendix Table \ref{tab:stats_tracking_urmsd_E5L} show the \ac{ubRMSD} tracking statistics between \ac{SMOS} \ac{L2} and ERA5-Land soil moisture.
-
-\begin{figure}[ht!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.png}
-    \caption{Cross-report tracking of ubRMSD scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
-    \label{fig:tracking_urmsd_E5L}
-\end{figure}
-
-\FloatBarrier
-
-
-\subsection{SMAP}
-
-Performance tracking of SMOS L2 compares soil moisture retrievals against SMAP during days where both missions have overlapping swaths.
-While both missions have similar characteristics, they are independent of each other, making them ideal candidates for cross-validation.
-
-For a detailed description of the used SMAP data, see Chapter \ref{ssec:smap}.
-The corresponding statistics are listed in Appendix Table \ref{tab:stats_tracking_R_SMAP}.
-
-\begin{figure}[ht!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-SMAP_L3.png}
-    \caption{Cross-report tracking of correlation scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
-    \label{fig:tracking_R_E5L}
-\end{figure}
-
-Accordingly, Fig. \ref{fig:tracking_urmsd_E5L} and Appendix Table \ref{tab:stats_tracking_urmsd_E5L} show the \ac{ubRMSD} tracking statistics between \ac{SMOS} \ac{L2} and ERA5-Land soil moisture.
-
-\begin{figure}[ht!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.png}
-    \caption{Cross-report tracking of ubRMSD scores between \ac{SMOS} \ac{L2} and ERA5-Land.}
-    \label{fig:tracking_urmsd_E5L}
-\end{figure}
-
-\FloatBarrier
-% ----------------------------------------------------------------------------------------------------------------------
-
-\subsection{Tracking summary} \label{ssec:tracking_summary}
-
-Table \ref{tab:tracking_status} summarizes the tracking results of \ac{SMOS} \ac{L2} with respect to the chosen reference datasets and performance metrics for this report from the previous chapter.
-The general quality indicator for this report in Fig. \ref{fig:indicator} (described in Chapter \ref{sec:summary}) is a combination of the indicators from Table \ref{tab:tracking_status}.
-
-\newcommand{\circlemark}[1]{\begin{tikzpicture}\draw[fill=#1] (0,0) circle (0.25cm);\end{tikzpicture}}
-
-\begin{table}[h]
+\begin{table}[ht!]
 \centering
-\caption{Performance indicators for individually tracked metrics. \textcolor{green}{Green} indicates performance within the expected bounds, \textcolor{red}{red} indicates performance outside the expected bounds, and \textcolor{gray}{gray} indicates no classification.}
-\begin{tabular}{@{}lcccc@{}}
-     & \multicolumn{2}{c}{ISMN} & \multicolumn{2}{c}{ERA5-Land} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5}
-     & R & ubRMSD & R & ubRMSD \\ \midrule
-Report \reportname & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['tracking_color']>$}} \\
+\small
+\caption{Tracking results for this report. Median: median across all valid locations. $\Delta$ prev.: median change at the locations shared with the previous report. Status: \textcolor{green!60!black}{green}: within the expected range, \textcolor{red}{red}: outside, \textcolor{gray}{gray}: not classified.}
+\label{tab:tracking_status}
+\begin{tabular}{@{}llrcrc@{}}
+\toprule
+Reference & Metric & Median & Expected range & $\Delta$ prev. & Status \\
+\midrule
+\ac{ISMN} \ac{FRMs} & R & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['current_median'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['current_median'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['expected_lower'] is None else f"[{ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['expected_lower']:.2f}, {ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['tracking_color']>$}} \\
+ & \ac{ubRMSD} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['expected_lower'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['expected_lower']:.3f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['expected_upper']:.3f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['tracking_color']>$}} \\
+\midrule
+ERA5-Land & R & \detokenize{$<'--' if ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['current_median'] is None else format(ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['current_median'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['expected_lower'] is None else f"[{ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['expected_lower']:.2f}, {ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['tracking_color']>$}} \\
+ & \ac{ubRMSD} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['expected_lower'] is None else f"[{ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['expected_lower']:.3f}, {ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['expected_upper']:.3f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['tracking_color']>$}} \\
+\midrule
+\ac{SMAP} \ac{L3} & R & \detokenize{$<'--' if ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['current_median'] is None else format(ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['current_median'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['expected_lower'] is None else f"[{ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['expected_lower']:.2f}, {ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['tracking_color']>$}} \\
+ & \ac{ubRMSD} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['expected_lower'] is None else f"[{ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['expected_lower']:.3f}, {ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['expected_upper']:.3f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['tracking_color']>$}} \\
 \bottomrule
 \end{tabular}
-\label{tab:tracking_status}
 \end{table}
+
+\noindent Figs. \ref{fig:tracking_ismn} to \ref{fig:tracking_smap} show the distribution of the metrics across all locations for each report (box: 25th to 75th percentile, whiskers: 5th to 95th percentile, black line and dots: median, n: number of locations).
+The current report is the rightmost box, colored according to its tracking status; the shaded area is its expected median range.
+All values are also listed in Chapter \ref{sec:tracking_tables}.
+
+\FloatBarrier
+
+\subsection{\texorpdfstring{\acs{ISMN} \acs{FRMs}}{ISMN FRMs}} \label{ssec:tracking_ismn}
+
+\noindent The number of stations with valid data varies between reports (e.g. frozen soils in winter, network data gaps); see Table \ref{tab:networks} for the sample of this report.
+
+\begin{itemize}
+    \item \textbf{R:} \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-SMOS_L2']['tracking']['summary']>$}
+    \item \textbf{\ac{ubRMSD}:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-SMOS_L2']['tracking']['summary']>$}
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/tracking_R_between_0-ISMN_and_1-SMOS_L2.png}
+        \caption{Pearson's R}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/tracking_urmsd_between_0-ISMN_and_1-SMOS_L2.png}
+        \caption{\ac{ubRMSD}}
+    \end{subfigure}
+    \caption{Cross-report tracking of Pearson's R (a) and \ac{ubRMSD} (b) between \ac{SMOS} \ac{L2} and \ac{ISMN} \ac{FRMs}.}
+    \label{fig:tracking_ismn}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\texorpdfstring{ERA5-Land}{ERA5-Land}} \label{ssec:tracking_e5l}
+
+\noindent The spatially complete ERA5-Land reanalysis provides the largest and most stable sample for tracking.
+
+\begin{itemize}
+    \item \textbf{R:} \detokenize{$<ReportVars['Tracking R_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['summary']>$}
+    \item \textbf{\ac{ubRMSD}:} \detokenize{$<ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-ERA5_LAND']['tracking']['summary']>$}
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-ERA5_LAND.png}
+        \caption{Pearson's R}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.png}
+        \caption{\ac{ubRMSD}}
+    \end{subfigure}
+    \caption{Cross-report tracking of Pearson's R (a) and \ac{ubRMSD} (b) between \ac{SMOS} \ac{L2} and ERA5-Land.}
+    \label{fig:tracking_e5l}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\texorpdfstring{\acs{SMAP} \acs{L3}}{SMAP L3}} \label{ssec:tracking_smap}
+
+\noindent A change that is only seen against \ac{SMAP} can point to issues in either of the two satellite products.
+
+\begin{itemize}
+    \item \textbf{R:} \detokenize{$<ReportVars['Tracking R_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['summary']>$}
+    \item \textbf{\ac{ubRMSD}:} \detokenize{$<ReportVars['Tracking urmsd_between_0-SMOS_L2_and_1-SMAP_L3']['tracking']['summary']>$}
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/tracking_R_between_0-SMOS_L2_and_1-SMAP_L3.png}
+        \caption{Pearson's R}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/tracking_urmsd_between_0-SMOS_L2_and_1-SMAP_L3.png}
+        \caption{\ac{ubRMSD}}
+    \end{subfigure}
+    \caption{Cross-report tracking of Pearson's R (a) and \ac{ubRMSD} (b) between \ac{SMOS} \ac{L2} and \ac{SMAP} \ac{L3}.}
+    \label{fig:tracking_smap}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Coverage} \label{ssec:tracking_coverage}
+
+\noindent Fig. \ref{fig:coverage} shows the number of grid points with valid results (i.e. where the \ac{ubRMSD} could be computed) against the two gridded references, ERA5-Land and \ac{SMAP} \ac{L3}, for each report.
+Changes in the coverage can indicate changes in the data availability of \ac{SMOS} \ac{L2} or the reference (e.g. due to frozen soils in winter or \ac{RFI}), and affect how comparable the metrics of different reports are.
+The number of valid \ac{ISMN} sensors is given in Table \ref{tab:networks}.
+The coverage is informative only and does not affect the tracking status.
+\detokenize{$<ReportVars['Coverage']['coverage']['summary']>$}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.85\textwidth]{./tracking/coverage.png}
+    \caption{Number of grid points with valid results per report against ERA5-Land and \ac{SMAP} \ac{L3}. The numbers are also listed in Table \ref{tab:stats_coverage}.}
+    \label{fig:coverage}
+\end{figure}
+
+\FloatBarrier
+

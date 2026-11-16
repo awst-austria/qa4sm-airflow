@@ -180,8 +180,10 @@ def _stage_new_report(**context):
         token=QA4SM_TOKEN,
     )
 
+    # Run order follows the config template names (01_*, 02_*, 03_*)
     report.restructure_runs({'run1': f"SMOS L2 (v700) {report_name} Run1",
-                             'run2': f"SMOS L2 (v700) {report_name} Run2"})
+                             'run2': f"SMOS L2 (v700) {report_name} Run2",
+                             'run3': f"SMOS L2 (v700) {report_name} Run3"})
 
     logger.info("[%s] Staging complete", report_name)
 
@@ -328,25 +330,28 @@ def _collect_and_compile(**context):
     logger.info("[%s] Collecting results", report_name)
     series[report_name].collect_content()
 
+    # (metric, unit, p-value variable for masking, corridor alpha)
     metrics = [
-        ('R_between_0-SMOS_L2_and_1-ERA5_LAND', '-', 'p_R_between_0-SMOS_L2_and_1-ERA5_LAND', 0.01),
-        ('urmsd_between_0-SMOS_L2_and_1-ERA5_LAND', 'm³m⁻³', None, 0.01),
         ('R_between_0-ISMN_and_1-SMOS_L2', '-', 'p_R_between_0-ISMN_and_1-SMOS_L2', 0.01),
         ('urmsd_between_0-ISMN_and_1-SMOS_L2', 'm³m⁻³', None, 0.01),
+        ('R_between_0-SMOS_L2_and_1-ERA5_LAND', '-', 'p_R_between_0-SMOS_L2_and_1-ERA5_LAND', 0.01),
+        ('urmsd_between_0-SMOS_L2_and_1-ERA5_LAND', 'm³m⁻³', None, 0.01),
+        ('R_between_0-SMOS_L2_and_1-SMAP_L3', '-', 'p_R_between_0-SMOS_L2_and_1-SMAP_L3', 0.01),
+        ('urmsd_between_0-SMOS_L2_and_1-SMAP_L3', 'm³m⁻³', None, 0.01),
     ]
     tracking_status = []
     report_data = {}
 
     for metric, unit, p_mask, alpha in metrics:
-        logger.info("[%s] Tracking metric: %s", report_name, metric)
-        logger.info("p_mask", p_mask)
-        logger.info("alpha", alpha)
+        logger.info("[%s] Tracking metric: %s (p_mask=%s, alpha=%s)",
+                    report_name, metric, p_mask, alpha)
 
         kwargs = dict(
             metric=metric, unit=unit,
             ref_epoch=report_name, n_epochs=n_epochs,
             path_out=series[report_name].report_root / "tracking",
             corridor_alpha=alpha,
+            min_history=3,   # previous reports required for a status
         )
         if metric.startswith('R_'):
             kwargs['pretty_name'] = 'R'
@@ -361,6 +366,15 @@ def _collect_and_compile(**context):
         else:
             tracking_status.append("none")
 
+
+    # Coverage: number of locations with valid results per gridded reference.
+    # Informative only, not part of the traffic light.
+    coverage = series.track_coverage(
+        metrics={'ERA5-Land': 'urmsd_between_0-SMOS_L2_and_1-ERA5_LAND',
+                 'SMAP L3': 'urmsd_between_0-SMOS_L2_and_1-SMAP_L3'},
+        ref_epoch=report_name, n_epochs=n_epochs,
+        path_out=series[report_name].report_root / "tracking")
+    report_data['Coverage'] = coverage.data
 
     tracking_status_not_none = [v for v in tracking_status if v != "none"]
 
@@ -380,7 +394,7 @@ def _collect_and_compile(**context):
         # shouldn't happen given only "ok"/"not ok"/"none" values
         traffic_light = "none"
 
-    logger.info("Traffic Light", traffic_light)
+    logger.info("[%s] Traffic light: %s", report_name, traffic_light)
     logger.info("[%s] Compiling PDF report", report_name)
 
 
@@ -403,7 +417,7 @@ def _collect_and_compile(**context):
 
     series[report_name].compile(
         template_path=latex_templ_path,
-        run_tex=['run1.tex', 'run2.tex'],
+        run_tex=['run_ismn.tex', 'run_gridded.tex', 'run_gridded.tex'],
         tex_ignore=None)
 
     dest = report_collection / filename

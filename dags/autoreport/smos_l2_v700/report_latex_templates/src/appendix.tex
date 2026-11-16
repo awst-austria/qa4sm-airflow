@@ -1,96 +1,119 @@
-\section{Appendix}
+% Datasets first, then the raw numbers of the tracking chapter
+\import{./}{datasets.tex}
 
-\subsection{Tracking Stats}
+\clearpage
 
+\section{Tracking statistics} \label{sec:tracking_tables}
+
+\noindent The following tables list the statistics across all locations for each report that are shown in the tracking figures in Chapter \ref{sec:tracking}.
+Reports are labelled by the last month of the covered period. N: number of valid locations (for R: only significant correlations).
 
 \begin{table}[htb]
 \centering
+\small
 \csvreader[
     separator=semicolon,
-    tabular=l r r r r r r r l,
-    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    tabular=l r r r r r r r r,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N \\ \midrule,
     late after last line=\\\bottomrule
 ]{./tracking/stats_R_between_0-ISMN_and_1-SMOS_L2.csv}{}%
 {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
-\caption{Statistics (quantiles and statistical moments) across previous reports tracking R between SMOS L2 and ISMN. Also shown in Fig. \ref{fig:tracking_R_ISMN}.}
-\label{tab:stats_tracking_R_ISMN}
+\caption{Tracking statistics of R between \ac{SMOS} \ac{L2} and \ac{ISMN} (see Fig. \ref{fig:tracking_ismn}).}
+\label{tab:stats_tracking_R_between_0-ISMN_and_1-SMOS_L2}
 \end{table}
-
 
 \begin{table}[htb]
 \centering
+\small
 \csvreader[
     separator=semicolon,
-    tabular=l r r r r r r r l,
-    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    tabular=l r r r r r r r r,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N \\ \midrule,
     late after last line=\\\bottomrule
 ]{./tracking/stats_urmsd_between_0-ISMN_and_1-SMOS_L2.csv}{}%
 {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
-\caption{Statistics (quantiles and statistical moments) across previous reports tracking ubRMSD between SMOS L2 and ISMN. Also shown in Fig. \ref{fig:tracking_urmsd_ISMN}.}
-\label{tab:stats_tracking_urmsd_ISMN}
+\caption{Tracking statistics of \ac{ubRMSD} between \ac{SMOS} \ac{L2} and \ac{ISMN} (see Fig. \ref{fig:tracking_ismn}).}
+\label{tab:stats_tracking_urmsd_between_0-ISMN_and_1-SMOS_L2}
 \end{table}
 
 \begin{table}[htb]
 \centering
+\small
 \csvreader[
     separator=semicolon,
-    tabular=l r r r r r r r l,
-    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    tabular=l r r r r r r r r,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N \\ \midrule,
     late after last line=\\\bottomrule
 ]{./tracking/stats_R_between_0-SMOS_L2_and_1-ERA5_LAND.csv}{}%
 {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
-\caption{Statistics (quantiles and statistical moments) across previous reports tracking R between SMOS L2 and ERA5-Land. Also shown in Fig. \ref{fig:tracking_R_E5L}.}
-\label{tab:stats_tracking_R_E5L}
+\caption{Tracking statistics of R between \ac{SMOS} \ac{L2} and ERA5-Land (see Fig. \ref{fig:tracking_e5l}).}
+\label{tab:stats_tracking_R_between_0-SMOS_L2_and_1-ERA5_LAND}
 \end{table}
-
 
 \begin{table}[htb]
 \centering
+\small
 \csvreader[
     separator=semicolon,
-    tabular=l r r r r r r r l,
-    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    tabular=l r r r r r r r r,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N \\ \midrule,
     late after last line=\\\bottomrule
 ]{./tracking/stats_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND.csv}{}%
 {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
-\caption{Statistics (quantiles and statistical moments) across previous reports tracking ubRMSD between SMOS L2 and ERA5-Land. Also shown in Fig. \ref{fig:tracking_urmsd_E5L}.}
-\label{tab:stats_tracking_urmsd_E5L}
+\caption{Tracking statistics of \ac{ubRMSD} between \ac{SMOS} \ac{L2} and ERA5-Land (see Fig. \ref{fig:tracking_e5l}).}
+\label{tab:stats_tracking_urmsd_between_0-SMOS_L2_and_1-ERA5_LAND}
 \end{table}
 
 \begin{table}[htb]
 \centering
+\small
 \csvreader[
     separator=semicolon,
-    tabular=l r r r r r r r l,
-    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    tabular=l r r r r r r r r,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N \\ \midrule,
     late after last line=\\\bottomrule
 ]{./tracking/stats_R_between_0-SMOS_L2_and_1-SMAP_L3.csv}{}%
 {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
-\caption{Statistics (quantiles and statistical moments) across previous reports tracking R between SMOS L2 and SMAP L3. Also shown in Fig. \ref{fig:tracking_R_SMAP}.}
-\label{tab:stats_tracking_R_SMAP}
+\caption{Tracking statistics of R between \ac{SMOS} \ac{L2} and \ac{SMAP} \ac{L3} (see Fig. \ref{fig:tracking_smap}).}
+\label{tab:stats_tracking_R_between_0-SMOS_L2_and_1-SMAP_L3}
 \end{table}
-
 
 \begin{table}[htb]
 \centering
+\small
 \csvreader[
     separator=semicolon,
-    tabular=l r r r r r r r l,
-    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N locations \\ \midrule,
+    tabular=l r r r r r r r r,
+    table head=\toprule Report & Q(5) & Q(25) & Median & Q(75) & Q(95) & Mean & Std.dev. & N \\ \midrule,
     late after last line=\\\bottomrule
 ]{./tracking/stats_urmsd_between_0-SMOS_L2_and_1-SMAP_L3.csv}{}%
 {\csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii & \csvcolviii & \csvcolix}
-\caption{Statistics (quantiles and statistical moments) across previous reports tracking ubRMSD between SMOS L2 and SMAP L3. Also shown in Fig. \ref{fig:tracking_urmsd_SMAP}.}
-\label{tab:stats_tracking_urmsd_SMAP}
+\caption{Tracking statistics of \ac{ubRMSD} between \ac{SMOS} \ac{L2} and \ac{SMAP} \ac{L3} (see Fig. \ref{fig:tracking_smap}).}
+\label{tab:stats_tracking_urmsd_between_0-SMOS_L2_and_1-SMAP_L3}
 \end{table}
-
-\FloatBarrier
-
-
-\subsection{ISMN networks}
 
 \begin{table}[htb]
 \centering
+\small
+\csvreader[
+    separator=semicolon,
+    tabular=l r r,
+    table head=\toprule Report & ERA5-Land & \acs{SMAP} \acs{L3} \\ \midrule,
+    late after last line=\\\bottomrule
+]{./tracking/stats_coverage.csv}{}%
+{\csvcoli & \csvcolii & \csvcoliii}
+\caption{Number of grid points with valid results per report for ERA5-Land and \acs{SMAP} \acs{L3} (see Fig. \ref{fig:coverage}).}
+\label{tab:stats_coverage}
+\end{table}
+
+\FloatBarrier
+\clearpage
+
+\section{ISMN networks} \label{sec:ismn_networks}
+
+\begin{table}[htb]
+\centering
+\small
 \begin{tabular}{@{}ll@{}}
 \toprule
 Network     & Reference \\ \midrule

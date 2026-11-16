@@ -1,30 +1,30 @@
-\section{Datasets}
+\section{Datasets} \label{sec:datasets}
 
-The following chapter contains an overview of the datasets and the data selection filters commonly applied across all validation runs in this report.
+This appendix describes the datasets and the data selection filters applied in the validation runs of this report.
 \\[1em]
 \noindent The common period for all datasets is from \textbf{\detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$}}.
 Only measurements within this period are used for validation.
 
 \subsection{Candidate - \detokenize{$<Run1ContentVars['ConfigVars']['DS0']['name']>$} (\detokenize{$<Run1ContentVars['ConfigVars']['DS0']['version']>$}) Soil Moisture}
 
-\noindent The \ac{SMOS} \ac{L2} Soil Moisture product (\url{https://doi.org/10.57780/SM1-857c3d7}) is a global dataset of surface soil moisture derived from ESA's \ac{SMOS} satellite \citep{kerr2001}.
+\noindent The \ac{SMOS} \ac{L2} Soil Moisture product (\url{https://doi.org/10.57780/SM1-857c3d7}) is a global dataset of surface soil moisture derived from \ac{ESA}'s \ac{SMOS} satellite \citep{kerr2001}.
 \ac{SMOS} carries a (passive) L-band microwave radiometer -- \ac{MIRAS} -- that measures brightness temperatures emitted by the Earth's surface.
 L-band microwave signals are highly sensitive to the water content in the top few centimetres of the soil layer.
 These measurements can therefore be inverted to estimate volumetric surface soil moisture content \citep{kerr1990,smosl2atbd}.
 The \ac{L2} product delivers this estimate at each node of a fixed discrete global grid -- the \ac{ISEA} 4H9 grid \citep{talone2015} -- along with measurement (quality) flags, retrieval diagnostics, and auxiliary outputs.
 The product is intended for a wide range of applications including hydrology, meteorology, and climate research, though known limitations apply over dense forests, frozen/snow-covered soils, heavily urbanised areas, and regions with strong \ac{RFI} \citep{smosl2atbd}.
 \\[1em]
-\noindent The \ac{L2} product is created through an iterative, physics-based retrieval algorithm that takes the L1c brightness temperature observations as input and fits them to a forward radiative-transfer model \citep{kerr2012}.
-For each grid node, the algorithm first pre-processes the L1c views -- filtering for quality and \ac{RFI}, computing incidence angles, and co-locating a range of auxiliary data (land cover, \ac{ECMWF} meteorological fields, \ac{LAI}, soil texture, etc.) on a fine sub-grid.
+\noindent The \ac{L2} product is created through an iterative, physics-based retrieval algorithm that takes the \ac{L1c} brightness temperature observations as input and fits them to a forward radiative-transfer model \citep{kerr2012}.
+For each grid node, the algorithm first pre-processes the \ac{L1c} views -- filtering for quality and \ac{RFI}, computing incidence angles, and co-locating a range of auxiliary data (land cover, \ac{ECMWF} meteorological fields, \ac{LAI}, soil texture, etc.) on a fine sub-grid.
 A decision tree then classifies the scene (vegetated soil, open water, snow, frozen soil, urban, etc.) and selects the appropriate forward model \citep{kerr2012}.
 An iterative minimisation (Levenberg--Marquardt) is run to find the values of soil moisture and vegetation opacity that best fit the observed multi-angular, dual-polarisation brightness temperatures \citep{smosl2atbd}.
 \\[1em]
-\noindent \ac{SMOS} L1 and \ac{L2} science data are available via ESA's Earth Online Data Catalogue \footnote{\url{https://earth.esa.int/eogateway/catalog/smos-science-products}}.
-Temporal extensions of the data are regularly applied at QA4SM.
+\noindent \ac{SMOS} \ac{L1} and \ac{L2} science data are available via \ac{ESA}'s Earth Online Data Catalogue \footnote{\url{https://earth.esa.int/eogateway/catalog/smos-science-products}}.
+Temporal extensions of the data are regularly applied at \ac{QA4SM}.
 \\[1em]
 \noindent The metadata fields provided with \ac{SMOS} \ac{L2} data are used to filter out soil moisture measurements with a high level of measurement uncertainty.
 For validation purpose, it is appropriate to use only those measurements that are considered reliable.
-Therefore, a range of data filters is implemented in QA4SM.
+Therefore, a range of data filters is implemented in \ac{QA4SM}.
 
 \subsubsection{Data filters}
 
@@ -34,26 +34,26 @@ For a detailed description and threshold values for each filter, see the validat
 
 \noindent The following \textit{binary} filters were activated:
 \begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run2ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
+\detokenize{$<' '.join([f"\\item {d['description']}" for d in Run2ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
 \end{itemize}
 \vspace{1em}
 \noindent The following \textit{parameterised} filters were activated with the indicated threshold set:
 \begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']} (threshold: {Run2ContentVars['ConfigVars']['DS1']['parametrised_filters'][i]['parameters']})" for i, d in enumerate(Run2ContentVars['ConfigVars']['DS1']['parametrised_filters_description'])])>$}
+\detokenize{$<' '.join([f"\\item {d['description']} (threshold: {Run2ContentVars['ConfigVars']['DS1']['parametrised_filters'][i]['parameters']})" for i, d in enumerate(Run2ContentVars['ConfigVars']['DS1']['parametrised_filters_description'])])>$}
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------------------
 
-\subsection{Reference 1 -- ERA5-Land (\detokenize{$<Run2ContentVars['ConfigVars']['DS0']['version']>$}) Surface SM} \label{ssec:era5land}
+\subsection{Reference -- ERA5-Land (\detokenize{$<Run2ContentVars['ConfigVars']['DS0']['version']>$}) Surface Soil Moisture} \label{ssec:era5land}
 
 \noindent ERA5-Land (\url{https://doi.org/10.24381/cds.e2161bac}), produced by \ac{ECMWF}, is a global reanalysis dataset that provides hourly data on land surface variables from 1950 to the present \citep{munozsabater2021}.
 It combines model data and observations to offer a consistent view of land variables like temperature, soil moisture, and precipitation.
 ERA5-Land has been produced by replaying the land component of the \ac{ECMWF} ERA5 \citep{hersbach2020}, providing surface variables with an increased spatial resolution (compared to ERA5 with $\approx$25 km) of $\approx$9 km.
 The original soil moisture fields of ERA5-Land are available in 1-hour intervals and without temporal gaps at four depth layers (at 0-7 cm depth, 7-28 cm, 28-100 cm, and 100-289 cm).
-For the data in QA4SM, the time steps at hours 0, 6, 12, and 18 of each day are regularly updated, leading to an available 6-hourly temporal sampling in the service.
+For the data in \ac{QA4SM}, the time steps at hours 0, 6, 12, and 18 of each day are regularly updated, leading to an available 6-hourly temporal sampling in the service.
 
 The final ERA5-Land data (excluding preliminary data from ERA5-Land T) are usually released with a delay of approximately two months behind present day.
-Only this final version of the data is currently used in QA4SM.
+Only this final version of the data is currently used in \ac{QA4SM}.
 \\[1em]
 For the validation of \ac{SMOS} \ac{L2}, we use soil moisture from the top layer of ERA5-Land (0–7 cm).
 Soil temperature information for the same layer is used to mask observations before validation (when $T < 0$ °C) to eliminate the potential impact of remaining outliers in the satellite data at the transition from liquid to frozen soil moisture.
@@ -64,12 +64,12 @@ The following lists contains all (\textit{binary}) data filters applied to ERA5-
 All filters are applied \textit{before} temporal matching with \ac{SMOS} \ac{L2} and computation of quality metrics.
 
 \begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run2ContentVars['ConfigVars']['DS0']['basic_filters_description']])>$}
+\detokenize{$<' '.join([f"\\item {d['description']}" for d in Run2ContentVars['ConfigVars']['DS0']['basic_filters_description']])>$}
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------------------------------------
 
-\subsection{Reference 2 -- ISMN in situ measurements (\detokenize{$<Run1ContentVars['ConfigVars']['DS1']['version']>$}) Soil Moisture} \label{ssec:ismn}
+\subsection{Reference -- ISMN in situ measurements (\detokenize{$<Run1ContentVars['ConfigVars']['DS1']['version']>$}) Soil Moisture} \label{ssec:ismn}
 
 \noindent The \ac{ISMN} \citep{dorigo2021} is a global, public collection of in situ soil moisture measurements from operational and historic networks and measurement campaigns\footnote{available for download after registration at \url{https://ismn.earth}}.
 The \ac{ISMN} collects, harmonizes and publishes ground measurements of soil moisture and related geophysical variables from various network maintainers across the globe.
@@ -80,51 +80,51 @@ Often there are multiple soil moisture sensors present at a station at similar d
 Some networks in Europe and the United States provide data in \ac{NRT}, meaning that new measurements are automatically added to the \ac{ISMN} database with a short delay.
 \\[1em]
 \ac{FRMs} comprise a subset of \ac{ISMN} measurements that are recommended for satellite validation.
-Here, we only consider data from ISMN sensors classified as "(very) representative" \ac{FRMs}.
+Here, we only consider data from \ac{ISMN} sensors classified as "(very) representative" \ac{FRMs}.
 For a detailed description of \ac{FRMs} and their exact definition, we refer to \cite{gruber2025}.
-An option to exclusively use \ac{FRMs} for a validation run is available via QA4SM and was selected.
+An option to exclusively use \ac{FRMs} for a validation run is available via \ac{QA4SM} and was selected.
 \\[1em]
-QA4SM hosts multiple downloaded snapshots of the full \ac{ISMN} archive.
+\ac{QA4SM} hosts multiple downloaded snapshots of the full \ac{ISMN} archive.
 The version used in this report is \detokenize{$<Run1ContentVars['ConfigVars']['DS1']['version']>$}.
-\ac{NRT} networks in this version are regularly updated in QA4SM and are the only networks used in this report for comparison with \ac{SMOS} \ac{L2}, i.e., non-NRT networks are currently not used.
+\ac{NRT} networks in this version are regularly updated in \ac{QA4SM} and are the only networks used in this report for comparison with \ac{SMOS} \ac{L2}, i.e., non-NRT networks are currently not used.
 
 \subsubsection{Data filters}
 
-\noindent The following \textit{binary} filters were activated for ISMN:
+\noindent The following \textit{binary} filters were activated for \ac{ISMN}:
 \begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run1ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
+\detokenize{$<' '.join([f"\\item {d['description']}" for d in Run1ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
 \end{itemize}
 \vspace{1em}
 
-\noindent A list of references and acknowledgements for all used ISMN networks is given in Appendix Table \ref{tab:ismn_refs}.
+\noindent A list of references and acknowledgements for all used \ac{ISMN} networks is given in Table \ref{tab:ismn_refs}.
 
 % ---------------------------------------------------------------------------------------------------------------------
 
-\subsection{Reference 3 -- SMAP (\detokenize{$<Run3ContentVars['ConfigVars']['DS1']['version']>$}) Soil Moisture} \label{ssec:smap}
+\subsection{Reference -- SMAP (\detokenize{$<Run3ContentVars['ConfigVars']['DS0']['version']>$}) Soil Moisture} \label{ssec:smap}
 
 \noindent \ac{SMAP} and \ac{SMOS} are comparable instruments with similar target applications. Both missions
 are designed to measure soil moisture in the top soil layer using passive microwave radiometry.
 Both systems operate in the L-band of the electromagnetic spectrum, which allows them to
 estimate the moisture content of soils even under vegetation cover.
 \\[1em]
-There are, however, some known differences between the two systems. ESA's \ac{SMOS} mission was launched
-5 years before NASA's \ac{SMAP}, so the \ac{SMOS} time series is significantly longer. On the other hand, \ac{SMOS}
+There are, however, some known differences between the two systems. \ac{ESA}'s \ac{SMOS} mission was launched
+5 years before \ac{NASA}'s \ac{SMAP}, so the \ac{SMOS} time series is significantly longer. On the other hand, \ac{SMOS}
 is known to be affected by \ac{RFI} in certain parts of the world (e.g.\ China, the Middle East, Ukraine and Russia).
-For the NASA mission, a technology to mitigate the impact of \ac{RFI} on the retrievals was therefore developed, making
+For the \ac{NASA} mission, a technology to mitigate the impact of \ac{RFI} on the retrievals was therefore developed, making
 \ac{SMAP} significantly more robust to \ac{RFI}. In addition, \ac{SMAP} was originally also equipped with a radar for active measurements.
 However, the radar failed shortly after launch and is therefore not used in operational data retrieval.
 \\[1em]
-Like the data from all operational satellite missions, \ac{SMAP} data are regularly reprocessed. QA4SM hosts multiple versions of the \ac{L3} dataset.
-The latest available version is used for the comparison with \ac{SMOS}; for this report, this is \detokenize{$<Run3ContentVars['ConfigVars']['DS1']['version']>$}.
+Like the data from all operational satellite missions, \ac{SMAP} data are regularly reprocessed. \ac{QA4SM} hosts multiple versions of the \ac{L3} dataset.
+The latest available version is used for the comparison with \ac{SMOS}; for this report, this is \detokenize{$<Run3ContentVars['ConfigVars']['DS0']['version']>$}.
 
 \subsubsection{Data filters}
 
 \noindent The following \textit{binary} filters were activated for \ac{SMAP}:
 \begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']}" for d in Run3ContentVars['ConfigVars']['DS1']['basic_filters_description']])>$}
+\detokenize{$<' '.join([f"\\item {d['description']}" for d in Run3ContentVars['ConfigVars']['DS0']['basic_filters_description']])>$}
 \end{itemize}
 \vspace{1em}
 \noindent The following \textit{parameterised} filters were activated with the indicated threshold set:
 \begin{itemize}
-\detokenize{$<'.'.join([f"\\item {d['description']} (threshold: {Run3ContentVars['ConfigVars']['DS1']['parametrised_filters'][i]['parameters']})" for i, d in enumerate(Run3ContentVars['ConfigVars']['DS1']['parametrised_filters_description'])])>$}
+\detokenize{$<' '.join([f"\\item {d['description']} (threshold: {Run3ContentVars['ConfigVars']['DS0']['parametrised_filters'][i]['parameters']})" for i, d in enumerate(Run3ContentVars['ConfigVars']['DS0']['parametrised_filters_description'])])>$}
 \end{itemize}
