@@ -371,11 +371,26 @@ def _collect_and_compile(**context):
             tracking_status.append("none")
 
 
-    # Coverage: number of locations with valid results per gridded reference.
+    # Number of observations (temporal matches) per grid point in the run
+    # against ERA5-Land. ERA5-Land is gap-free, so n_obs reflects the
+    # availability of SMOS L2 (temporal reference) and reveals gaps / outages.
     # Informative only, not part of the traffic light.
-    coverage = series.track_coverage(
-        metrics={'ERA5-Land': 'urmsd_between_0-SMOS_L2_and_1-ERA5_LAND',
-                 'SMAP L3': 'urmsd_between_0-SMOS_L2_and_1-SMAP_L3'},
+    logger.info("[%s] Tracking number of observations (ERA5-Land run)", report_name)
+    nobs = series.track_metric(
+        metric='n_obs', unit='-', pretty_name='Number of observations',
+        ref_epoch=report_name, n_epochs=n_epochs,
+        run='Run2',  # ERA5-Land run (run folder names end with RunX)
+        title='SMOS L2 vs. ERA5 LAND',
+        path_out=series[report_name].report_root / "tracking",
+        corridor_alpha=0.01, min_history=3)
+    report_data['Nobs'] = nobs.data
+
+    # Spatial coverage: number of locations with GOOD validation status (0)
+    # per gridded reference. Informative only, not part of the traffic light.
+    logger.info("[%s] Tracking spatial coverage", report_name)
+    coverage = series.track_spatial_coverage(
+        status_vars=['status_between_0-SMOS_L2_and_1-ERA5_LAND',
+                     'status_between_0-SMOS_L2_and_1-SMAP_L3'],
         ref_epoch=report_name, n_epochs=n_epochs,
         path_out=series[report_name].report_root / "tracking")
     report_data['Coverage'] = coverage.data
@@ -497,7 +512,7 @@ with DAG(
         task_id="wait_for_data",
         python_callable=_sense_data_available,
         poke_interval=60 * 60 * 24,        # check every 24 hours
-        timeout=60 * 60 * 24 * 90,
+        timeout=60 * 60 * 24 * 100,        # give up after 100 days
         mode="reschedule",                 # frees up worker slot while waiting
         doc="Wait for the data to be available in the service. "
             "This can take up to 12 weeks; we check once per day and continue "

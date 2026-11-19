@@ -1,0 +1,332 @@
+% Template for the validation run of the C3S SM COMBINED, ACTIVE and PASSIVE
+% products against ISMN in situ data (all three products in one validation run).
+% Netcdf results: ISMN is dataset 0, COMBINED 1, ACTIVE 2, PASSIVE 3.
+% Per product values are taken from
+%   ContentVars['NetcdfVars']['pairs']['0-ISMN_and_<i>-C3S_<product>']
+%   ContentVars['SummaryVars']['<STAT>_<METRIC>_<i>-C3S_<PRODUCT>']
+% The product subsections are generated, keep them consistent when editing.
+\def\runidx{\detokenize{$<ContentVars['report_run_index']>$}}
+
+\subsection{Validation settings} \label{ssec:settings}
+
+The \ac{C3S} SM COMBINED, ACTIVE and PASSIVE products were validated against \ac{ISMN} (\detokenize{$<ContentVars['NetcdfMetaVars']['val_dc_version_pretty_name0']>$}) in a single validation run.
+The validation settings follow the settings used in the \ac{PQAR} \citep{c3spqar}.
+For a full list of the settings used, see the results page of this validation run, linked in Table \ref{tab:val_run_list}.
+
+\begin{itemize}
+    \item Spatial reference (spatial matching): \textbf{\detokenize{$<ContentVars['ConfigVars']['spatial_reference']>$}}
+    \item Temporal reference (temporal matching): \textbf{\detokenize{$<ContentVars['ConfigVars']['temporal_reference']>$}}
+    \item Temporal matching window: \textbf{\detokenize{$<ContentVars['ConfigVars']['temporal_matching']>$} hour(s)}
+    \item Scaling: \textbf{\detokenize{$<ContentVars['ConfigVars']['scaling_method'].replace('_', ' ')>$}} (scaling reference: \textbf{\detokenize{$<ContentVars['ConfigVars']['scaling_reference']>$}})
+    \item Validation metrics \detokenize{$<'\\textbf{are}' if ContentVars['ConfigVars']['anomalies_method']!='none' else '\\textbf{are not}'>$} based on anomalies.
+\end{itemize}
+
+\noindent Within a validation run, the metrics are computed only from the time stamps at which \textit{all} datasets (\ac{ISMN} and the three products) provide a valid observation.
+The results of the three products are therefore based on the same sensors and time stamps and are directly comparable.
+On the other hand, a gap in one of the products (e.g.\ no retrievals over frozen soils) also reduces the sample of the other two.
+\\[1em]
+\noindent Before the metrics are computed, the time series of each product is scaled to the mean and standard deviation of the \ac{ISMN} time series at the same location.
+This removes systematic differences that are mainly caused by the spatial scale mismatch between point measurements and the 0.25° satellite footprint \citep{gruber2020}, and converts the ACTIVE product (degree of saturation, in \%) to volumetric units.
+The bias is therefore zero by design, the \ac{ubRMSD} equals the RMSD, and the \ac{ubRMSD} of all three products is given in \unitsm{}.
+\\[1em]
+\noindent The products were compared against \textbf{\detokenize{$<ContentVars['NetcdfVars']['n_gpis']>$}} in situ time series in 0--10\,cm depth.
+Note that some of these sensors can be collocated, as a single monitoring site usually operates multiple sensors.
+The nearest grid cell of the products is found for each \ac{ISMN} sensor; all validation results are therefore computed at the \ac{ISMN} locations.
+Additional metrics are available in the validation results \href{\detokenize{$<ContentVars['NetcdfMetaVars']['url']>$}}{online}.
+
+\FloatBarrier
+
+\subsection{Number of observations} \label{ssec:results_nobs}
+
+\noindent \ac{QA4SM} matches all datasets in time to the temporal reference selected for the validation run (\textbf{\detokenize{$<ContentVars['ConfigVars']['temporal_reference']>$}}).
+For each observation of the temporal reference, a window of \detokenize{$<ContentVars['ConfigVars']['temporal_matching']>$} hour(s) around its time stamp is searched for observations of all other datasets.
+If a dataset has multiple observations in the window, the one nearest in time is used.
+Only the time stamps at which \textit{all} datasets provide an observation are kept.
+The number of observations (n\_obs) at a location is therefore the same for all pairs of the reference and the non-reference datasets in a validation run, i.e.\ the same for COMBINED, ACTIVE and PASSIVE, and is shown only once here (Fig.\ \ref{fig:nobs\runidx}).
+All metrics in the following sections are based on these common observations.
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.64\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_n_obs.png}
+    \subcaption{} % (a)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \plotfig{./qa4sm_graphics/bulk_boxplot_n_obs.png}
+    \subcaption{} % (b)
+\end{minipage}
+\caption{Number of common observations of \ac{ISMN} and the \ac{C3S} SM COMBINED, ACTIVE and PASSIVE products after temporal matching, per sensor (a) and distribution across all sensors (b). The same for all three products.}
+\label{fig:nobs\runidx}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\ac{C3S} SM COMBINED} \label{ssec:results_combined}
+
+\noindent Validation metrics could be computed for \textbf{\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_1-C3S_combined']['n_ok']>$}} of the \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_1-C3S_combined']['n_status']>$} sensors (\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_1-C3S_combined']['percent_ok']>$}\,\%) for \ac{C3S} SM COMBINED.
+For the remaining \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_1-C3S_combined']['n_failed']>$} sensors, no metrics were computed (Fig. \ref{fig:status_combined\runidx}), mostly because too few valid observation pairs remained after filtering and temporal matching.
+This typically affects stations with frozen or snow-covered soils, and networks that did not provide recent data.
+Table \ref{tab:networks_combined} breaks the sample down by network, and Table \ref{tab:sumstats_combined\runidx} lists summary statistics of Pearson's R and the \ac{ubRMSD} across all valid sensors.
+Fig. \ref{fig:maps_combined\runidx} shows Pearson's R and the \ac{ubRMSD} between \ac{C3S} SM COMBINED and \ac{ISMN} at all valid sensors.
+
+\begin{table}[htb!]
+    \centering
+    \small
+    \caption{\ac{ISMN} networks in the validation of \ac{C3S} SM COMBINED: number of tested sensors, number of sensors with valid results, and median Pearson's R and \ac{ubRMSD} (in \unitsm{}) of the valid sensors. References for each network are listed in Table \ref{tab:ismn_refs}.}
+    \label{tab:networks_combined}
+    \begin{tabular}{@{}lrrrr@{}}
+        \toprule
+        \textbf{Network} & \textbf{Sensors} & \textbf{Valid} & \textbf{Median R} & \textbf{Median ubRMSD} \\
+        \midrule
+        \detokenize{$<' \\\\ '.join([n['network'].replace('_', '\\_') + ' & ' + str(n['n_sensors']) + ' & ' + str(n.get('n_ok', '--')) + ' & ' + ('--' if n.get('median_R') is None else format(n['median_R'], '.2f')) + ' & ' + ('--' if n.get('median_urmsd') is None else format(n['median_urmsd'], '.3f')) for n in ContentVars['NetcdfVars']['pairs']['0-ISMN_and_1-C3S_combined']['networks']]) + ' \\\\'>$}
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[htb!]
+    \centering
+    \caption{Summary statistics of \ac{C3S} SM COMBINED against \ac{ISMN} across all valid sensors (\ac{ubRMSD} in \unitsm{}).}
+    \label{tab:sumstats_combined\runidx}
+    \begin{tabular}{ l r r }
+        \toprule
+        \textbf{Metric} & \textbf{Pearson's R}  & \textbf{ubRMSD}  \\
+        \midrule
+        \textbf{Mean}                & \detokenize{$<ContentVars['SummaryVars']['MEAN_PEARSON'S R_1-C3S_COMBINED']:.2f>$}   & \detokenize{$<ContentVars['SummaryVars']['MEAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION_1-C3S_COMBINED']:.3f>$}   \\
+        \textbf{Median}              & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_PEARSON'S R_1-C3S_COMBINED']:.2f>$} & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION_1-C3S_COMBINED']:.3f>$} \\
+        \textbf{Interquartile range} & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_PEARSON'S R_1-C3S_COMBINED']:.2f>$}    & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_UNBIASED ROOT-MEAN-SQUARE DEVIATION_1-C3S_COMBINED']:.3f>$}    \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \plotfig{./qa4sm_graphics/bulk_barplot_status_0-ISMN_and_1-C3S_combined.png}
+    \subcaption{} % (a)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.64\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_1-C3S_combined_status.png}
+    \subcaption{} % (b)
+\end{minipage}
+\caption{Number of successfully validated sensors and errors (a), and their location (b) in the validation of \ac{C3S} SM COMBINED against \ac{ISMN}.}
+\label{fig:status_combined\runidx}
+\end{figure}
+
+\begin{figure}[ht!]
+\centering
+\begin{subfigure}{\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_1-C3S_combined_R.png}
+    \caption{}
+\end{subfigure}
+\medskip
+\begin{subfigure}{\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_1-C3S_combined_urmsd.png}
+    \caption{}
+\end{subfigure}
+\caption{Pearson's R (a) and \ac{ubRMSD} (b) between \ac{C3S} SM COMBINED and \ac{ISMN} at all valid sensors.}
+\label{fig:maps_combined\runidx}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\ac{C3S} SM ACTIVE} \label{ssec:results_active}
+
+\noindent Validation metrics could be computed for \textbf{\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_2-C3S_active']['n_ok']>$}} of the \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_2-C3S_active']['n_status']>$} sensors (\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_2-C3S_active']['percent_ok']>$}\,\%) for \ac{C3S} SM ACTIVE.
+For the remaining \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_2-C3S_active']['n_failed']>$} sensors, no metrics were computed (Fig. \ref{fig:status_active\runidx}), mostly because too few valid observation pairs remained after filtering and temporal matching.
+This typically affects stations with frozen or snow-covered soils, and networks that did not provide recent data.
+Table \ref{tab:networks_active} breaks the sample down by network, and Table \ref{tab:sumstats_active\runidx} lists summary statistics of Pearson's R and the \ac{ubRMSD} across all valid sensors.
+Fig. \ref{fig:maps_active\runidx} shows Pearson's R and the \ac{ubRMSD} between \ac{C3S} SM ACTIVE and \ac{ISMN} at all valid sensors.
+
+\begin{table}[htb!]
+    \centering
+    \small
+    \caption{\ac{ISMN} networks in the validation of \ac{C3S} SM ACTIVE: number of tested sensors, number of sensors with valid results, and median Pearson's R and \ac{ubRMSD} (in \unitsm{}) of the valid sensors. References for each network are listed in Table \ref{tab:ismn_refs}.}
+    \label{tab:networks_active}
+    \begin{tabular}{@{}lrrrr@{}}
+        \toprule
+        \textbf{Network} & \textbf{Sensors} & \textbf{Valid} & \textbf{Median R} & \textbf{Median ubRMSD} \\
+        \midrule
+        \detokenize{$<' \\\\ '.join([n['network'].replace('_', '\\_') + ' & ' + str(n['n_sensors']) + ' & ' + str(n.get('n_ok', '--')) + ' & ' + ('--' if n.get('median_R') is None else format(n['median_R'], '.2f')) + ' & ' + ('--' if n.get('median_urmsd') is None else format(n['median_urmsd'], '.3f')) for n in ContentVars['NetcdfVars']['pairs']['0-ISMN_and_2-C3S_active']['networks']]) + ' \\\\'>$}
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[htb!]
+    \centering
+    \caption{Summary statistics of \ac{C3S} SM ACTIVE against \ac{ISMN} across all valid sensors (\ac{ubRMSD} in \unitsm{}).}
+    \label{tab:sumstats_active\runidx}
+    \begin{tabular}{ l r r }
+        \toprule
+        \textbf{Metric} & \textbf{Pearson's R}  & \textbf{ubRMSD}  \\
+        \midrule
+        \textbf{Mean}                & \detokenize{$<ContentVars['SummaryVars']['MEAN_PEARSON'S R_2-C3S_ACTIVE']:.2f>$}   & \detokenize{$<ContentVars['SummaryVars']['MEAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION_2-C3S_ACTIVE']:.3f>$}   \\
+        \textbf{Median}              & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_PEARSON'S R_2-C3S_ACTIVE']:.2f>$} & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION_2-C3S_ACTIVE']:.3f>$} \\
+        \textbf{Interquartile range} & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_PEARSON'S R_2-C3S_ACTIVE']:.2f>$}    & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_UNBIASED ROOT-MEAN-SQUARE DEVIATION_2-C3S_ACTIVE']:.3f>$}    \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \plotfig{./qa4sm_graphics/bulk_barplot_status_0-ISMN_and_2-C3S_active.png}
+    \subcaption{} % (a)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.64\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_2-C3S_active_status.png}
+    \subcaption{} % (b)
+\end{minipage}
+\caption{Number of successfully validated sensors and errors (a), and their location (b) in the validation of \ac{C3S} SM ACTIVE against \ac{ISMN}.}
+\label{fig:status_active\runidx}
+\end{figure}
+
+\begin{figure}[ht!]
+\centering
+\begin{subfigure}{\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_2-C3S_active_R.png}
+    \caption{}
+\end{subfigure}
+\medskip
+\begin{subfigure}{\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_2-C3S_active_urmsd.png}
+    \caption{}
+\end{subfigure}
+\caption{Pearson's R (a) and \ac{ubRMSD} (b) between \ac{C3S} SM ACTIVE and \ac{ISMN} at all valid sensors.}
+\label{fig:maps_active\runidx}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\ac{C3S} SM PASSIVE} \label{ssec:results_passive}
+
+\noindent Validation metrics could be computed for \textbf{\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_3-C3S_passive']['n_ok']>$}} of the \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_3-C3S_passive']['n_status']>$} sensors (\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_3-C3S_passive']['percent_ok']>$}\,\%) for \ac{C3S} SM PASSIVE.
+For the remaining \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ISMN_and_3-C3S_passive']['n_failed']>$} sensors, no metrics were computed (Fig. \ref{fig:status_passive\runidx}), mostly because too few valid observation pairs remained after filtering and temporal matching.
+This typically affects stations with frozen or snow-covered soils, and networks that did not provide recent data.
+Table \ref{tab:networks_passive} breaks the sample down by network, and Table \ref{tab:sumstats_passive\runidx} lists summary statistics of Pearson's R and the \ac{ubRMSD} across all valid sensors.
+Fig. \ref{fig:maps_passive\runidx} shows Pearson's R and the \ac{ubRMSD} between \ac{C3S} SM PASSIVE and \ac{ISMN} at all valid sensors.
+
+\begin{table}[htb!]
+    \centering
+    \small
+    \caption{\ac{ISMN} networks in the validation of \ac{C3S} SM PASSIVE: number of tested sensors, number of sensors with valid results, and median Pearson's R and \ac{ubRMSD} (in \unitsm{}) of the valid sensors. References for each network are listed in Table \ref{tab:ismn_refs}.}
+    \label{tab:networks_passive}
+    \begin{tabular}{@{}lrrrr@{}}
+        \toprule
+        \textbf{Network} & \textbf{Sensors} & \textbf{Valid} & \textbf{Median R} & \textbf{Median ubRMSD} \\
+        \midrule
+        \detokenize{$<' \\\\ '.join([n['network'].replace('_', '\\_') + ' & ' + str(n['n_sensors']) + ' & ' + str(n.get('n_ok', '--')) + ' & ' + ('--' if n.get('median_R') is None else format(n['median_R'], '.2f')) + ' & ' + ('--' if n.get('median_urmsd') is None else format(n['median_urmsd'], '.3f')) for n in ContentVars['NetcdfVars']['pairs']['0-ISMN_and_3-C3S_passive']['networks']]) + ' \\\\'>$}
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[htb!]
+    \centering
+    \caption{Summary statistics of \ac{C3S} SM PASSIVE against \ac{ISMN} across all valid sensors (\ac{ubRMSD} in \unitsm{}).}
+    \label{tab:sumstats_passive\runidx}
+    \begin{tabular}{ l r r }
+        \toprule
+        \textbf{Metric} & \textbf{Pearson's R}  & \textbf{ubRMSD}  \\
+        \midrule
+        \textbf{Mean}                & \detokenize{$<ContentVars['SummaryVars']['MEAN_PEARSON'S R_3-C3S_PASSIVE']:.2f>$}   & \detokenize{$<ContentVars['SummaryVars']['MEAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION_3-C3S_PASSIVE']:.3f>$}   \\
+        \textbf{Median}              & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_PEARSON'S R_3-C3S_PASSIVE']:.2f>$} & \detokenize{$<ContentVars['SummaryVars']['MEDIAN_UNBIASED ROOT-MEAN-SQUARE DEVIATION_3-C3S_PASSIVE']:.3f>$} \\
+        \textbf{Interquartile range} & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_PEARSON'S R_3-C3S_PASSIVE']:.2f>$}    & \detokenize{$<ContentVars['SummaryVars']['IQ RANGE_UNBIASED ROOT-MEAN-SQUARE DEVIATION_3-C3S_PASSIVE']:.3f>$}    \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \plotfig{./qa4sm_graphics/bulk_barplot_status_0-ISMN_and_3-C3S_passive.png}
+    \subcaption{} % (a)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.64\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_3-C3S_passive_status.png}
+    \subcaption{} % (b)
+\end{minipage}
+\caption{Number of successfully validated sensors and errors (a), and their location (b) in the validation of \ac{C3S} SM PASSIVE against \ac{ISMN}.}
+\label{fig:status_passive\runidx}
+\end{figure}
+
+\begin{figure}[ht!]
+\centering
+\begin{subfigure}{\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_3-C3S_passive_R.png}
+    \caption{}
+\end{subfigure}
+\medskip
+\begin{subfigure}{\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ISMN_and_3-C3S_passive_urmsd.png}
+    \caption{}
+\end{subfigure}
+\caption{Pearson's R (a) and \ac{ubRMSD} (b) between \ac{C3S} SM PASSIVE and \ac{ISMN} at all valid sensors.}
+\label{fig:maps_passive\runidx}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Comparison of the products} \label{ssec:results_comparison}
+
+\noindent Fig. \ref{fig:box\runidx} compares the distribution of Pearson's R and the \ac{ubRMSD} of the three products across all valid sensors.
+As all products are evaluated at the same sensors and time stamps (Chapter \ref{ssec:settings}), the differences between the products are not caused by differences in the sample.
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=8cm,keepaspectratio]{./qa4sm_graphics/bulk_boxplot_R.png}
+    \subcaption{} % (a)
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=8cm,keepaspectratio]{./qa4sm_graphics/bulk_boxplot_urmsd.png}
+    \subcaption{} % (b)
+\end{minipage}
+\caption{Distribution of Pearson's R (a) and the \ac{ubRMSD} (b) between the \ac{C3S} SM products and \ac{ISMN} across all valid sensors.}
+\label{fig:box\runidx}
+\end{figure}
+
+\FloatBarrier
+
+\subsubsection{Results per land cover class} \label{ssec:results_lc}
+
+\noindent The performance of satellite soil moisture retrievals depends on the land cover, in particular on the density of the vegetation \citep{dorigo2017}.
+Fig. \ref{fig:lc\runidx} therefore splits Pearson's R and the \ac{ubRMSD} of the three products by the land cover class of the in situ sites (\ac{ESA} \ac{CCI} Land Cover, 2010; aggregated classes as in the \ac{PQAR}).
+Lower R and higher \ac{ubRMSD} are typically found for sensors in tree cover, where the soil moisture signal is attenuated by the vegetation layer \citep{c3spqar}.
+The median \ac{ubRMSD} per class and product is compared to the \ac{C3S} accuracy requirement (\kpithres{}~\unitsm{}) in Chapter \ref{sec:tracking} (Table \ref{tab:tracking_status}).
+
+\begin{figure}[ht!]
+\centering
+\begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[width=0.85\fullwidth,height=9.5cm,keepaspectratio]{./qa4sm_graphics/bulk_boxplot_R_metadata_lc_2010.png}
+    \caption{}
+\end{subfigure}
+\medskip
+\begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[width=0.85\fullwidth,height=9.5cm,keepaspectratio]{./qa4sm_graphics/bulk_boxplot_urmsd_metadata_lc_2010.png}
+    \caption{}
+\end{subfigure}
+\caption{Pearson's R (a) and \ac{ubRMSD} (b) between the \ac{C3S} SM products and \ac{ISMN} by land cover class (\ac{ESA} \ac{CCI}, 2010) of the in situ sites. N is the number of tested sensors per class (including sensors without valid results).}
+\label{fig:lc\runidx}
+\end{figure}

@@ -1,0 +1,223 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage[T1]{fontenc}    % Correct rendering of <, > etc. in generated text
+\usepackage[utf8]{inputenc}
+\usepackage[printonlyused]{acronym}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{csvsimple}
+\usepackage{wrapfig}
+\usepackage[
+    top=2cm,
+    bottom=2cm,
+    left=2.5cm,
+    right=2.5cm,
+    headheight=14pt
+]{geometry}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=blue,
+    citecolor=black,
+}
+\usepackage[authoryear]{natbib}
+\usepackage{lmodern}
+\usepackage{microtype}      % Better text justification and spacing
+\usepackage{import}
+\usepackage[section]{placeins} % floats never move past the start of the next section
+\usepackage{subcaption}
+\usepackage{xcolor}
+\pagestyle{plain}
+\usepackage{tikz}   % To draw circles
+
+\newcommand{\platformversion}{\detokenize{$<ReportVars['Common']['qa4sm_version']>$}}
+\newcommand{\reportfreq}{Quarterly}
+\newcommand{\timecovered}{\detokenize{$<ReportVars['Common']['interval_days']>$} days (\detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$})}
+\newcommand{\seriesfolder}{\detokenize{$<ReportVars['Common']['series_name'].replace('_', '\_')>$}}
+\newcommand{\otherreportsui}{https://qa4sm.eu/ui/reports/\seriesfolder}
+\newcommand{\otherreportsapi}{https://qa4sm.eu/api/autoreports/\seriesfolder}
+\newcommand{\reportname}{\detokenize{$<ReportVars['Common']['report_name']>$}}
+\newcommand{\reportfilename}{\detokenize{$<ReportVars['Common']['filename'].replace('_', '\_')>$}}
+
+% Products validated in this report
+\newcommand{\cdsall}{\ac{C3S} SM COMBINED, ACTIVE and PASSIVE}
+
+% Accuracy requirements for the ubRMSD (m3/m3)
+\newcommand{\kpithres}{0.10}
+\newcommand{\gcosthres}{0.04}
+\newcommand{\unitsm}{m\textsuperscript{3}m\textsuperscript{-3}}
+
+% Consistent figure sizes, independent of the map format (a regional map is
+% usually tall, a global map wide): maps are fitted into a fixed box, keeping
+% their aspect ratio; bar / box plots always use the same width.
+% Sizes refer to the full text width (\textwidth changes inside minipages).
+\newlength{\fullwidth}
+\AtBeginDocument{\setlength{\fullwidth}{\textwidth}}
+\newcommand{\plotfig}[1]{\includegraphics[width=0.32\fullwidth,height=8cm,keepaspectratio]{#1}}
+\newcommand{\mapfig}[1]{\includegraphics[width=0.62\fullwidth,height=8cm,keepaspectratio]{#1}}
+
+% Pages that only contain figures/tables: align them at the top instead of
+% centering them vertically
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{8pt plus 1fil}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+
+% Colored status marker for tracking results (green / red / gray)
+\newcommand{\circlemark}[1]{\begin{tikzpicture}[baseline=-0.6ex]\draw[fill=#1] (0,0) circle (0.18cm);\end{tikzpicture}}
+
+
+% Document
+\begin{document}
+
+    \begin{center}
+    {\Large{QA4SM Automated Validation Report for}} \\[2mm]
+    {\Huge{C3S Soil Moisture (v202605)}} \\[1mm]
+    {\Large{Date of creation: \detokenize{$<ReportVars['Common']['compilation_date']>$}}}
+    \end{center}
+
+    \vspace{3mm}
+    \hrule
+    \vspace{1mm}
+    \hrule
+    \vspace{3mm}
+
+    {\small
+    \noindent\begin{tabular}{@{}ll@{}}
+    QA4SM version:               & {\platformversion} \quad (report frequency: {\reportfreq}) \\
+    Period covered:              & {\timecovered}  \\
+    Other reports:               & {\url{\otherreportsui}}  \\
+    API access:                  & {\url{\otherreportsapi}}  \\
+    Contact:                     & {\href{mailto:support@qa4sm.eu}{support@qa4sm.eu}}  \\
+    \end{tabular}
+    }
+
+    \vspace{2mm}
+    \hrule
+
+    \vspace{3mm}
+    \noindent\fbox{%
+      \parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{\small\raggedright
+        \textbf{How to cite:} QA4SM (\detokenize{$<ReportVars['Common']['compilation_date'].split('-')[0]>$}). \textit{C3S Soil Moisture COMBINED, ACTIVE and PASSIVE (v202605) Automated Validation Report for the period \detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$}}. C3S Soil Moisture (v202605) Validation Report Series, Available online: \url{\otherreportsapi/\reportfilename}
+      }%
+    }
+
+    \vspace{2mm}
+    \begin{center}
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{@{}llllcccc@{}}
+    \toprule
+     & & & & & \multicolumn{3}{c}{ubRMSD (expected: $\leq$ \kpithres{}~\unitsm{})} \\
+    \cmidrule(l){6-8}
+    Reference & Run (ID/URL) & Completed & Product & R & Cropland & Grassland & Tree cover \\
+    \midrule
+    \acs{ISMN} &
+        \href{\detokenize{$<Run1ContentVars['NetcdfMetaVars']['url']>$}}{\detokenize{$<Run1ContentVars['remote_id'][:8]>$}\ldots}\footnotemark &
+        \detokenize{$<str(Run1ContentVars['RemoteVars']['run_end'])[:16]>$} &
+        COMBINED &
+        \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['tracking_color']>$}} \\
+     & & &
+        ACTIVE &
+        \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['tracking_color']>$}} \\
+     & & &
+        PASSIVE &
+        \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['tracking_color']>$}} &
+        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['tracking_color']>$}} \\
+    \bottomrule
+    \end{tabular}
+    \captionof{table}{Validation run against \ac{ISMN} and tracking status per product: \textcolor{green!60!black}{within}, \textcolor{red}{outside} the expected range, or \textcolor{gray}{not classified}. Details in Chapter \ref{sec:tracking} (Table \ref{tab:tracking_status}).}
+    \label{tab:val_run_list}
+    \end{center}
+    \footnotetext{\raggedright Validation run ID: \detokenize{$<Run1ContentVars['remote_id']>$}, \url{\detokenize{$<Run1ContentVars['NetcdfMetaVars']['url']>$}}}
+
+    \vspace{2mm}
+    \hrule
+    \vspace{2mm}
+    \noindent Note: This report was generated automatically and may contain errors. In case of questions, please contact the provided support email address. For a detailed description of all functionality in \ac{QA4SM}, please see the \href{https://qa4sm.eu/api/user-manual}{User Manual}.
+    \vspace{2mm}
+    \hrule
+
+    \section{Report summary} \label{sec:summary}
+
+    \noindent This report validates the \cdsall{} (v202605) surface soil moisture records for \detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$} against \ac{ISMN} in situ measurements (0--10\,cm), using a single validation run with common sensors and time stamps for all products.
+    Of the \detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and 'tracking' in v])>$} tracked metrics, \textbf{\detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and v.get('tracking', {}).get('tracking_status') == 'ok'])>$}} are within their expected range, \textbf{\detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and v.get('tracking', {}).get('tracking_status') == 'not ok'])>$}} are outside, and \textbf{\detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and v.get('tracking', {}).get('tracking_status') == 'none'])>$}} could not be classified (Table \ref{tab:val_run_list}, details in Chapter \ref{sec:tracking}).
+
+    % Overall tracking indicator: vertically centered in the remaining space of page 1
+    \vfill
+    \noindent\begin{minipage}[c]{0.3\textwidth}
+        \centering
+        \includegraphics[angle=-90,width=3.2cm]{\detokenize{$<ReportVars['Common']['traffic_light']>$}.png}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[c]{0.68\textwidth}
+        {\small\textbf{Overall tracking indicator}\par}
+        {\footnotesize Green: all tracked metrics within their expected range; yellow: some outside; red: all outside; no color: no tracking possible. Also encoded in the filename suffix (G, Y, R, N).\par}
+    \end{minipage}
+    \vfill
+
+    \clearpage
+    \normalsize \tableofcontents
+
+
+    \clearpage
+
+    \import{./}{tracking.tex}
+    \clearpage % is also floatbarrier
+
+    \section{Validation results} \label{sec:results}
+
+    This chapter contains the detailed results of the validation run between \cdsall{} and \ac{ISMN} for the period of this report, with one section per product and a comparison of the products.
+    The datasets and the applied data filters are described in Chapter \ref{sec:datasets}.
+
+    \import{./C3S v202605 \reportname\space Run1/}{run_ismn.tex}
+    \clearpage  % is also floatbarrier
+    % Supplementary chapters (numbered, no appendix letters)
+    \import{./}{appendix.tex}
+    \clearpage  % is also floatbarrier
+
+    \section*{List of Acronyms}
+    % Compact list: normal (not bold) labels in an aligned column, no extra space between entries
+    \renewcommand*{\aclabelfont}[1]{\acsfont{#1}}
+    \begin{acronym}[ubRMSD\quad]
+    \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}\setlength{\parsep}{0pt}
+    \acro{ASCAT}{Advanced Scatterometer}
+    \acro{ATBD}{Algorithm Theoretical Basis Document}
+    \acro{C3S}{Copernicus Climate Change Service}
+    \acro{CCI}{Climate Change Initiative}
+    \acro{CDR}{Climate Data Record}
+    \acro{ESA}{European Space Agency}
+    \acro{FRMs}{Fiducial Reference Measurements}
+    \acro{GCOS}{Global Climate Observing System}
+    \acro{GLDAS}{Global Land Data Assimilation System}
+    \acro{ICDR}{Interim Climate Data Record}
+    \acro{ISMN}{International Soil Moisture Network}
+    \acro{KPI}{Key Performance Indicator}
+    \acro{NRT}{Near Real Time}
+    \acro{PQAR}{Product Quality Assessment Report}
+    \acro{QA4SM}{Quality Assurance for Soil Moisture}
+    \acro{SMAP}{Soil Moisture Active Passive}
+    \acro{SMOS}{Soil Moisture and Ocean Salinity}
+    \acro{TCA}{Triple Collocation Analysis}
+    \acro{ubRMSD}{Unbiased Root Mean Square Difference}
+    \end{acronym}
+
+    \clearpage  % is also floatbarrier
+
+    \bibliographystyle{plainnat}
+    \bibliography{references.bib}
+
+\end{document}

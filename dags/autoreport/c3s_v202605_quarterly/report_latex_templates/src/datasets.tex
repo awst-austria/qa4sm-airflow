@@ -1,0 +1,68 @@
+\section{Datasets} \label{sec:datasets}
+
+This chapter describes the datasets and the data selection filters applied in the validation run of this report.
+\\[1em]
+\noindent The validation period is from \textbf{\detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$}}.
+Only measurements within this period are used for validation.
+
+\subsection{Candidates -- \ac{C3S} SM COMBINED, ACTIVE and PASSIVE (\detokenize{$<next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'C3S SM combined')['version']>$})} \label{ssec:c3s}
+
+\noindent The \ac{C3S} satellite soil moisture products (\url{https://doi.org/10.24381/cds.d7782f18}) are global, long-term \acp{CDR} of daily surface soil moisture (representative of the top few centimetres of the soil) on a regular 0.25° grid \citep{c3satbd}.
+The algorithm is based on that of the \ac{ESA} \ac{CCI} Soil Moisture project \citep{liu2012,dorigo2017,gruber2019}.
+Three products are provided:
+\begin{itemize}
+    \item \textbf{ACTIVE}: merges soil moisture retrievals from active microwave sensors (scatterometers, e.g.\ \ac{ASCAT}). It is provided as degree of saturation (in \%).
+    \item \textbf{PASSIVE}: merges soil moisture retrievals from passive microwave sensors (radiometers, e.g.\ \ac{SMOS}, \ac{SMAP}, AMSR2, GPM), in \unitsm{}.
+    \item \textbf{COMBINED}: merges the active and passive retrievals into a single harmonised record, in \unitsm{}, available from November 1978 to present.
+\end{itemize}
+For the COMBINED product, all sensor time series are first rescaled into a common climatology (via CDF matching against \ac{GLDAS} Noah land surface model simulations), their random errors are estimated via \ac{TCA}, and the rescaled observations are then merged using weighted averaging, with weights based on the estimated errors.
+A final break detection and correction step reduces inhomogeneities introduced by changes in the sensor constellation over time \citep{preimesberger2021}.
+\\[1em]
+\noindent The \acp{CDR} are updated once per year and extended in between by an \ac{ICDR}, which is based on the same input data streams and algorithm and therefore has very similar quality characteristics \citep{c3spqar}.
+\ac{ICDR} extensions are published every 10 days, each containing 10 days of new data, with a delay of 1--2 weeks after the last day covered by the extension.
+Data are available through the Copernicus Climate Data Store; the full quality assessment of each product version is published in the \ac{PQAR} \citep{c3spqar}.
+In \ac{QA4SM}, the records are regularly extended with new \ac{ICDR} data.
+\\[1em]
+\noindent The \ac{C3S} COMBINED product targets an accuracy (\ac{ubRMSD}) of 0.01--\kpithres{}~\unitsm{}, depending on land cover and climate (\ac{KPI} KPI.SM.D3.1, \citealp{c3spqar}); \ac{GCOS} specifies \gcosthres{}~\unitsm{} for surface soil moisture \citep{gcos2022}.
+Known limitations apply over dense vegetation, frozen or snow-covered soils (where no soil moisture is provided), and in regions affected by radio-frequency interference \citep{dorigo2017}.
+
+\subsubsection{Data filters}
+
+\noindent All filters are applied \textit{before} quality metrics are computed.
+For a detailed description of each filter, see the validation run online (link in Table \ref{tab:val_run_list}) and the \href{https://qa4sm.eu/api/user-manual}{QA4SM User Manual}.
+The following \textit{binary} filters were activated:
+\begin{itemize}
+    \item COMBINED: \detokenize{$<', '.join([d['description'] for d in next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'C3S SM combined')['basic_filters_description']])>$}
+    \item ACTIVE: \detokenize{$<', '.join([d['description'] for d in next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'C3S SM active')['basic_filters_description']])>$}
+    \item PASSIVE: \detokenize{$<', '.join([d['description'] for d in next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'C3S SM passive')['basic_filters_description']])>$}
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------------------
+
+\subsection{Reference -- ISMN in situ measurements (\detokenize{$<next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'ISMN')['version']>$})} \label{ssec:ismn}
+
+\noindent The \ac{ISMN} \citep{dorigo2021} is a global, public collection of in situ soil moisture measurements from operational and historic networks and measurement campaigns\footnote{available for download after registration at \url{https://ismn.earth}}.
+The \ac{ISMN} collects, harmonizes and publishes ground measurements of soil moisture and related geophysical variables from various network maintainers across the globe.
+Data within the \ac{ISMN} are subject to quality controls and provided with quality flags \citep{dorigo2013}.
+Some networks in Europe and the United States provide data in \ac{NRT}, meaning that new measurements are automatically added to the \ac{ISMN} database with a short delay.
+\\[1em]
+\ac{QA4SM} hosts multiple downloaded snapshots of the full \ac{ISMN} archive.
+The version used in this report is \detokenize{$<next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'ISMN')['version']>$}.
+\ac{NRT} networks in this version are regularly updated in \ac{QA4SM} and are the only networks used in this report, i.e., non-NRT networks are currently not used.
+In line with the \ac{PQAR} \citep{c3spqar}, all sensors in 0--10\,cm depth are used.
+In addition, only sensors classified as \ac{FRMs} are used, i.e.\ the subset of \ac{ISMN} sensors that is recommended for satellite validation; see the \ac{PQAR} for their definition \citep{c3spqar}.
+
+\subsubsection{Data filters}
+
+\noindent The following \textit{binary} filters were activated for \ac{ISMN}:
+\begin{itemize}
+\detokenize{$<' '.join([f"\\item {d['description']}" for d in next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'ISMN')['basic_filters_description']])>$}
+\end{itemize}
+\vspace{1em}
+\noindent The following \textit{parameterised} filters were activated with the indicated parameters:
+\begin{itemize}
+\detokenize{$<' '.join(["\\item " + d['description'] + ' (' + next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'ISMN')['parametrised_filters'][i]['parameters'].replace('_', '\\_').replace(',', ', ') + ')' for i, d in enumerate(next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'ISMN')['parametrised_filters_description'])])>$}
+\end{itemize}
+\vspace{1em}
+
+\noindent A list of references and acknowledgements for all used \ac{ISMN} networks is given in Table \ref{tab:ismn_refs}.

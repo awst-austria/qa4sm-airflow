@@ -121,19 +121,33 @@ All values are also listed in Chapter \ref{sec:tracking_tables}.
 
 \FloatBarrier
 
-\subsection{Coverage} \label{ssec:tracking_coverage}
+\subsection{Data availability} \label{ssec:tracking_coverage}
 
-\noindent Fig. \ref{fig:coverage} shows the number of grid points with valid results (i.e. where the \ac{ubRMSD} could be computed) against the two gridded references, ERA5-Land and \ac{SMAP} \ac{L3}, for each report.
+\noindent Two indicators show whether the amount of data the metrics are based on changes between reports.
+They are informative only and do not affect the tracking status.
+\\[1em]
+\noindent\textbf{Spatial coverage:} Fig. \ref{fig:coverage} shows the number of grid points for which the validation was successful (status GOOD) against the two gridded references, ERA5-Land and \ac{SMAP} \ac{L3}, for each report.
 Changes in the coverage can indicate changes in the data availability of \ac{SMOS} \ac{L2} or the reference (e.g. due to frozen soils in winter or \ac{RFI}), and affect how comparable the metrics of different reports are.
 The number of valid \ac{ISMN} sensors is given in Table \ref{tab:networks}.
-The coverage is informative only and does not affect the tracking status.
 \detokenize{$<ReportVars['Coverage']['coverage']['summary']>$}
+\\[1em]
+\noindent\textbf{Number of observations:} Fig. \ref{fig:tracking_nobs} shows the distribution of the number of temporally matched observations (n\_obs) per grid point in the validation against ERA5-Land.
+As ERA5-Land is gap-free, n\_obs reflects the availability of \ac{SMOS} \ac{L2} (the temporal reference).
+A drop in n\_obs at an unchanged spatial coverage indicates a temporal gap in the \ac{SMOS} \ac{L2} data stream (e.g. an outage that produced empty files): the metrics are then still computed at the same locations, but from fewer observations, and are less robust.
+\detokenize{$<ReportVars['Nobs']['tracking']['summary']>$}
 
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.85\textwidth]{./tracking/coverage.png}
-    \caption{Number of grid points with valid results per report against ERA5-Land and \ac{SMAP} \ac{L3}. The numbers are also listed in Table \ref{tab:stats_coverage}.}
+    \caption{Number of grid points with successful validation (status GOOD) per report against ERA5-Land and \ac{SMAP} \ac{L3}. The numbers are also listed in Table \ref{tab:stats_coverage}.}
     \label{fig:coverage}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.85\textwidth]{./tracking/tracking_n_obs.png}
+    \caption{Cross-report tracking of the number of temporally matched observations (n\_obs) per grid point between \ac{SMOS} \ac{L2} and ERA5-Land. Shaded area: expected range derived from the previous reports.}
+    \label{fig:tracking_nobs}
 \end{figure}
 
 \FloatBarrier

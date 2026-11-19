@@ -1,0 +1,224 @@
+% Expected ReportVars entries (output of AutoReportSeries.track_metric),
+% for each <product> in 1-C3S_combined, 2-C3S_active, 3-C3S_passive:
+%   'Tracking R_between_0-ISMN_and_<product>'
+%       Expected range derived from the previous reports (as for SMOS).
+%       Files in ./tracking/
+%   'Tracking urmsd_between_0-ISMN_and_<product>_lc_<class>'
+%       for <class> in cropland, grassland, treecover. Fixed expected range
+%       (corridor_bounds=(0, 0.1)), sensors masked by land cover class.
+%       Files in ./tracking/lc_<class>/
+% The product rows / subsections are generated, keep them consistent when editing.
+
+\section{Performance tracking} \label{sec:tracking}
+
+\noindent This chapter tracks the agreement of the \ac{C3S} SM COMBINED, ACTIVE and PASSIVE products with \ac{ISMN} in situ measurements (Chapter \ref{sec:datasets}) across the reports in this series.
+Each report covers one calendar quarter; consecutive reports therefore do not overlap in time.
+For each product, two metrics are tracked, with different definitions of the \textit{expected range}:
+
+\begin{itemize}
+    \item \textbf{Pearson's R} (only significant correlations, $p \leq$ \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['p_mask_thres']>$}) across all sensors. The expected range is derived from the previous reports, to detect unexpected changes in the temporal agreement with the in situ data.
+    \item The \textbf{\ac{ubRMSD}}, separately for sensors in cropland, grassland and tree cover\footnote{Land cover class (\ac{ESA} \ac{CCI} Land Cover, 2010) of the in situ site as provided in the \ac{ISMN} metadata, aggregated as in the \ac{PQAR}. The classes ``urban areas'' and ``other'' contain only few sensors and are not tracked.}. The expected range is fixed to the \ac{C3S} accuracy requirement of 0--\kpithres{}~\unitsm{}.
+\end{itemize}
+
+\noindent\textbf{Expected range (R):} The medians across all sensors from up to \detokenize{$<ReportVars['Common']['n_epochs'] - 1>$} previous reports are used to fit a normal distribution.
+The \detokenize{$<format(ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['alpha'] * 100, 'g')>$}\,\% and \detokenize{$<format(100 - ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['alpha'] * 100, 'g')>$}\,\% quantiles of this distribution define the expected range for the median of the current report.
+A median outside this range is flagged (\textcolor{red}{red}).
+At least \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['min_history']>$} previous reports are required to derive an expected range; otherwise the metric is not classified (\textcolor{gray}{gray}).
+Note that the agreement with in situ data varies with the season (e.g. vegetation, frozen soils in winter), which widens the expected range.
+\\[1em]
+\noindent\textbf{Expected range (ubRMSD):} The \ac{C3S} \ac{KPI} for the accuracy of the COMBINED product (KPI.SM.D3.1) requires a \ac{ubRMSD} of 0.01--\kpithres{}~\unitsm{}, depending on land cover and climate \citep{c3spqar}.
+The same threshold is applied to the ACTIVE and PASSIVE products, whose \ac{ubRMSD} is also given in \unitsm{} after the scaling to the in situ data (Chapter \ref{ssec:settings}).
+A land cover class is flagged (\textcolor{red}{red}) when the median \ac{ubRMSD} of its sensors exceeds \kpithres{}~\unitsm{}; it is not classified (\textcolor{gray}{gray}) if no sensor of the class has valid results.
+For reference, \ac{GCOS} specifies a more ambitious requirement of \gcosthres{}~\unitsm{} for surface soil moisture \citep{gcos2022}.
+\\[1em]
+\noindent\textbf{Change at common locations:} The median across all sensors also depends on \textit{which} sensors are included, which can change between reports.
+Therefore, the median change of the metric at the locations shared with the previous report is given in addition ($\Delta$ prev.).
+It is informative only and does not affect the tracking status.
+
+\begin{table}[ht!]
+\centering
+\small
+\caption{Tracking results for this report. N: number of locations with valid results. Median: median across all valid locations. Expected range: derived from the previous reports (R), \ac{C3S} accuracy requirement (\ac{ubRMSD}, in \unitsm{}). $\Delta$ prev.: median change at the locations shared with the previous report. Status: \textcolor{green!60!black}{green}: within the expected range, \textcolor{red}{red}: outside, \textcolor{gray}{gray}: not classified.}
+\label{tab:tracking_status}
+\begin{tabular}{@{}lllrrcrc@{}}
+\toprule
+Product & Metric & Class & N & Median & Expected range & $\Delta$ prev. & Status \\
+\midrule
+COMBINED & R & all & \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['current_median'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['current_median'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['tracking_color']>$}} \\
+ & \ac{ubRMSD} & Cropland & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['tracking_color']>$}} \\
+ &  & Grassland & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['tracking_color']>$}} \\
+ &  & Tree cover & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['tracking_color']>$}} \\
+\midrule
+ACTIVE & R & all & \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['current_median'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['current_median'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['tracking_color']>$}} \\
+ & \ac{ubRMSD} & Cropland & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['tracking_color']>$}} \\
+ &  & Grassland & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['tracking_color']>$}} \\
+ &  & Tree cover & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['tracking_color']>$}} \\
+\midrule
+PASSIVE & R & all & \detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['current_median'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['current_median'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['tracking_color']>$}} \\
+ & \ac{ubRMSD} & Cropland & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['tracking_color']>$}} \\
+ &  & Grassland & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['tracking_color']>$}} \\
+ &  & Tree cover & \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['current_n']>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['current_median'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['current_median'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['expected_upper'] is None else f"[{ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['expected_lower'] or 0:.2f}, {ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['expected_upper']:.2f}]">$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['paired_previous']['median_diff'] is None else format(ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['paired_previous']['median_diff'], '+.3f')>$} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['tracking_color']>$}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The figures in Chapters \ref{ssec:tracking_combined}--\ref{ssec:tracking_passive} show the distribution of the metrics across all locations for each report (box: 25th to 75th percentile, whiskers: 5th to 95th percentile, black line and dots: median, n: number of locations).
+The current report is the rightmost box, colored according to its tracking status; the shaded area is its expected median range.
+All values are also listed in Chapter \ref{sec:tracking_tables}.
+
+\FloatBarrier
+
+\subsection{Data availability} \label{ssec:tracking_availability}
+
+\noindent Two indicators show whether the amount of data the metrics are based on changes between reports.
+They are informative only and are not part of the overall tracking indicator.
+\\[1em]
+\noindent\textbf{Spatial coverage:} The number of \ac{ISMN} sensors for which the validation was successful (status GOOD), per product (Fig.\ \ref{fig:tracking_coverage}).
+A drop indicates that fewer locations could be validated, e.g.\ due to frozen soils in winter, missing in situ data, or missing satellite retrievals.
+\detokenize{$<ReportVars['Coverage']['coverage']['summary']>$}
+\\[1em]
+\noindent\textbf{Number of observations:} The distribution of the number of common time stamps per sensor after temporal matching (n\_obs, Chapter \ref{ssec:results_nobs}), which is the same for all three products (Fig.\ \ref{fig:tracking_nobs}).
+A drop in n\_obs at an unchanged number of validated sensors indicates a temporal gap in the data stream (e.g.\ an outage that produced empty files): the metrics are then still computed at the same locations, but from fewer observations, and are less robust.
+\detokenize{$<ReportVars['Nobs']['tracking']['summary']>$}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./tracking/coverage.png}
+    \caption{Cross-report tracking of the number of \ac{ISMN} sensors with successful validation (status GOOD) for each product.}
+    \label{fig:tracking_coverage}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./tracking/tracking_n_obs.png}
+    \caption{Cross-report tracking of the number of common observations (n\_obs) per \ac{ISMN} sensor, the same for all products. Shaded area: expected range derived from the previous reports.}
+    \label{fig:tracking_nobs}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\ac{C3S} SM COMBINED} \label{ssec:tracking_combined}
+
+\noindent\textbf{Pearson's R:} The number of sensors with valid data varies between reports (e.g. frozen soils in winter, network data gaps); see Table \ref{tab:networks_combined} for the sample of this report.
+\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['summary']>$}
+\\[1em]
+\noindent\textbf{ubRMSD per land cover class:}
+\begin{itemize}
+    \item \textbf{Cropland:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['summary']>$}
+    \item \textbf{Grassland:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['summary']>$}
+    \item \textbf{Tree cover:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['summary']>$}
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./tracking/tracking_R_between_0-ISMN_and_1-C3S_combined.png}
+    \caption{Cross-report tracking of Pearson's R between \ac{C3S} SM COMBINED and \ac{ISMN}. Shaded area: expected range derived from the previous reports.}
+    \label{fig:tracking_R_combined}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_cropland/tracking_urmsd_between_0-ISMN_and_1-C3S_combined.png}
+        \caption{Cropland}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_grassland/tracking_urmsd_between_0-ISMN_and_1-C3S_combined.png}
+        \caption{Grassland}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_treecover/tracking_urmsd_between_0-ISMN_and_1-C3S_combined.png}
+        \caption{Tree cover}
+    \end{subfigure}
+    \caption{Cross-report tracking of the \ac{ubRMSD} between \ac{C3S} SM COMBINED and \ac{ISMN} for sensors in cropland (a), grassland (b) and tree cover (c). Shaded area: \ac{C3S} accuracy requirement (0--\kpithres{}~\unitsm{}).}
+    \label{fig:tracking_lc_combined}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\ac{C3S} SM ACTIVE} \label{ssec:tracking_active}
+
+\noindent\textbf{Pearson's R:} The number of sensors with valid data varies between reports (e.g. frozen soils in winter, network data gaps); see Table \ref{tab:networks_active} for the sample of this report.
+\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['summary']>$}
+\\[1em]
+\noindent\textbf{ubRMSD per land cover class:}
+\begin{itemize}
+    \item \textbf{Cropland:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['summary']>$}
+    \item \textbf{Grassland:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['summary']>$}
+    \item \textbf{Tree cover:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['summary']>$}
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./tracking/tracking_R_between_0-ISMN_and_2-C3S_active.png}
+    \caption{Cross-report tracking of Pearson's R between \ac{C3S} SM ACTIVE and \ac{ISMN}. Shaded area: expected range derived from the previous reports.}
+    \label{fig:tracking_R_active}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_cropland/tracking_urmsd_between_0-ISMN_and_2-C3S_active.png}
+        \caption{Cropland}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_grassland/tracking_urmsd_between_0-ISMN_and_2-C3S_active.png}
+        \caption{Grassland}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_treecover/tracking_urmsd_between_0-ISMN_and_2-C3S_active.png}
+        \caption{Tree cover}
+    \end{subfigure}
+    \caption{Cross-report tracking of the \ac{ubRMSD} between \ac{C3S} SM ACTIVE and \ac{ISMN} for sensors in cropland (a), grassland (b) and tree cover (c). Shaded area: \ac{C3S} accuracy requirement (0--\kpithres{}~\unitsm{}).}
+    \label{fig:tracking_lc_active}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{\ac{C3S} SM PASSIVE} \label{ssec:tracking_passive}
+
+\noindent\textbf{Pearson's R:} The number of sensors with valid data varies between reports (e.g. frozen soils in winter, network data gaps); see Table \ref{tab:networks_passive} for the sample of this report.
+\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['summary']>$}
+\\[1em]
+\noindent\textbf{ubRMSD per land cover class:}
+\begin{itemize}
+    \item \textbf{Cropland:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['summary']>$}
+    \item \textbf{Grassland:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['summary']>$}
+    \item \textbf{Tree cover:} \detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['summary']>$}
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{./tracking/tracking_R_between_0-ISMN_and_3-C3S_passive.png}
+    \caption{Cross-report tracking of Pearson's R between \ac{C3S} SM PASSIVE and \ac{ISMN}. Shaded area: expected range derived from the previous reports.}
+    \label{fig:tracking_R_passive}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_cropland/tracking_urmsd_between_0-ISMN_and_3-C3S_passive.png}
+        \caption{Cropland}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_grassland/tracking_urmsd_between_0-ISMN_and_3-C3S_passive.png}
+        \caption{Grassland}
+    \end{subfigure}
+    \begin{subfigure}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./tracking/lc_treecover/tracking_urmsd_between_0-ISMN_and_3-C3S_passive.png}
+        \caption{Tree cover}
+    \end{subfigure}
+    \caption{Cross-report tracking of the \ac{ubRMSD} between \ac{C3S} SM PASSIVE and \ac{ISMN} for sensors in cropland (a), grassland (b) and tree cover (c). Shaded area: \ac{C3S} accuracy requirement (0--\kpithres{}~\unitsm{}).}
+    \label{fig:tracking_lc_passive}
+\end{figure}
+
+\FloatBarrier
