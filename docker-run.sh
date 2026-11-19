@@ -41,8 +41,9 @@ cat qa4sm.env >> .env
 
 docker logout ghcr.io > /dev/null 2>&1 || true
 
-# start all necessary containers
-docker compose --verbose up --detach airflow-init
+# start all necessary containers. --build rebuilds the airflow image if the
+# Dockerfile or base_requirements.txt changed (otherwise the cache is used)
+docker compose --verbose up --build --detach airflow-init
 docker compose --verbose up --detach
 # docker compose --profile flower up --detach   # port 5555
 

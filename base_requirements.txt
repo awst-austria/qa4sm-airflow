@@ -1,10 +1,15 @@
+# Requirements of the Airflow environment (NOT the DAG images).
+# All versions are pinned: to upgrade a package, change its version here and
+# rerun docker-run.sh (this changes the file -> pip layer is rebuilt).
+# Versions of airflow-related packages follow the official Airflow constraints
+# (see AIRFLOW_CONSTRAINTS in the Dockerfile), which also pin their dependencies.
 apache-airflow==3.4.0
-apache-airflow-providers-docker
-apache-airflow-providers-standard
-apache-airflow-providers-smtp
-apache-airflow-providers-fab
-numpy
-pandas
-python-dotenv
-qa4sm-api>=0.2
-qa4sm-autoreports>=0.2
+apache-airflow-providers-docker==4.6.1
+apache-airflow-providers-standard==1.21.0
+apache-airflow-providers-smtp==3.2.0
+apache-airflow-providers-fab==3.10.2
+numpy==2.5.4
+pandas==3.1.0
+python-dotenv==1.2.4
+# Autoreports DAGs (also installs qa4sm-api)
+qa4sm-autoreports==0.3.0
