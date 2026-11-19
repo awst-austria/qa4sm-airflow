@@ -13,17 +13,6 @@ environment file (`airflow-dag-XXX` with `pull_policy: always` in `compose.yaml`
 3) After a few seconds the airflow service should run on port 8085 (localhost:8085).
 4) To stop and clean up the container run `bash docker-stop.sh`.
 
-## Upgrading from the Airflow 2 setup
-The setup is based on Airflow 3 (see `Dockerfile` / `base_requirements.txt`).
-Airflow 3 no longer supports PostgreSQL 13, so the metadata DB runs on
-postgres:16 with a new, empty volume (`postgres16-db-volume`). The DAG run
-history of the Airflow 2 setup is not carried over: the autoreport DAG
-(`catchup=True`) will therefore process all months since its `start_date` (2025-01) again.
-The old volume (`<project>_postgres-db-volume`) is not used anymore and can be
-removed with `docker volume rm` once the new setup runs.
-
-The web UI is now served by the `airflow-apiserver` container (still on port 8085).
-
 ## Setup
 This setup will build/launch multiple images/containers. See the `compose.yml` setup.
 
@@ -59,14 +48,46 @@ send requests to the production API!). For this
 
 # DAGs
 
-## Data Update DAGs
+All DAGs are in `dags/` (shared helper functions in `dags/misc.py`). Paths
+(`QA4SM_DATA_PATH`, `QA4SM_REPORTS_PATH`) and API access are taken from `qa4sm.env`.
 
-Contains the DAGs that update the datasets on the server. This includes downloading
-images from various online sources (FTP, CDS, etc.) and converting them to time
-series. Afterwards, the updated period is reported to QA4SM.
+## Data Update DAGs (`dags/data_update/`)
 
-## Autoreport DAGs
+Keep the operational datasets on the service up to date. Each DAG runs weekly
+in its own DockerOperator image (`*_DAG_IMAGE` in `qa4sm.env`): it downloads new
+images from the data provider (FTP, CDS, etc.), appends them to the time series
+and reports the new period (and fixtures) to the QA4SM API.
 
-Contains templates and code to run regular validations on the service and
-compile PDF reports from  the downloaded results. Uses the qa4sm-api python
-package and the qa4sm-autoreports package.
+| DAG | Dataset / version | Image variable |
+|---|---|---|
+| `C3S-<version>-Processing` | C3S SM v202505, v202312 | `C3S_SM_DAG_IMAGE` |
+| `ERA5-<version>-Processing` | ERA5 (latest, extended) | `ERA_DAG_IMAGE` |
+| `ERA5Land-<version>-Processing` | ERA5-Land (latest, extended) | `ERA_DAG_IMAGE` |
+| `ISMN-<version>-Processing` | ISMN 20260518 (extended) | `ISMN_DAG_IMAGE` |
+| `SMAP_L3-<version>-Processing` | SMAP L3 v9 | `SMAP_DAG_IMAGE` |
+| `SMOS_L2-<version>-Processing` | SMOS L2 v700 | `SMOS_DAG_IMAGE` |
+
+## Autoreport DAGs (`dags/autoreport/`)
+
+Run predefined validations on QA4SM at regular intervals and compile a PDF
+report from the results, using the
+[qa4sm-autoreports](https://pypi.org/project/qa4sm-autoreports/) package
+(installed via `base_requirements.txt`, runs in the Airflow environment, needs
+LaTeX from the `Dockerfile`). Each report series has a folder with
+`report_config_templates/` (one QA4SM validation config per run) and
+`report_latex_templates/src/` (LaTeX templates filled with the results).
+
+Every DAG run goes through the same steps:
+1. Stage a new report for the period (copy configs, set the time period)
+2. Trigger the validation runs on QA4SM
+3. Wait until all runs are finished (sensor, up to several days)
+4. Download the results, track the metrics against previous reports
+   (traffic light), fill the templates and compile the PDF
+
+Results are stored in `$QA4SM_REPORTS_PATH/results/<series>`, the PDFs in
+`$QA4SM_REPORTS_PATH/pdf/<series>` (both directories must exist on the host).
+
+| DAG | Series | Schedule / period | Validation runs |
+|---|---|---|---|
+| `SMOS_L2-v700-Autoreport` | `SMOS_L2_v700` | monthly, last 3 months | SMOS L2 vs. ISMN, ERA5-Land, SMAP L3 |
+| `C3S_SM-v202605-Autoreport` | `C3S_v202605_Quarterly` | quarterly, last complete quarter | ISMN, ERA5-Land vs. C3S combined / active / passive |
