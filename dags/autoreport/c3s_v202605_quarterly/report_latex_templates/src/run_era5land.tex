@@ -1,0 +1,116 @@
+% Template for the validation run of the C3S SM COMBINED, ACTIVE and PASSIVE
+% products against ERA5-Land (all three products in one validation run).
+% Netcdf results: ERA5-Land is dataset 0, COMBINED 1, ACTIVE 2, PASSIVE 3.
+% QA4SM provides no summary statistics (SummaryVars) for results of this size,
+% the medians / IQRs are therefore taken from the tracking of the current
+% report: ReportVars['Tracking <R|urmsd>_between_0-ERA5_LAND_and_<product>'].
+% Kept short on purpose: the focus of the report is the ISMN validation.
+\def\runidx{\detokenize{$<ContentVars['report_run_index']>$}}
+
+\subsection{Validation settings} \label{ssec:era5_settings}
+
+\noindent The \ac{C3S} SM COMBINED, ACTIVE and PASSIVE products were compared against ERA5-Land (\detokenize{$<ContentVars['NetcdfMetaVars']['val_dc_version_pretty_name0']>$}, top soil layer 0--7\,cm, Chapter \ref{ssec:era5land}) in a second validation run, with the following settings (full list: results page linked in Table \ref{tab:val_run_list}):
+
+\begin{itemize}
+    \item Spatial reference: \textbf{\detokenize{$<ContentVars['ConfigVars']['spatial_reference']>$}}; temporal reference: \textbf{\detokenize{$<ContentVars['ConfigVars']['temporal_reference']>$}} (matching window: \detokenize{$<ContentVars['ConfigVars']['temporal_matching']>$} hour(s))
+    \item Scaling: \textbf{\detokenize{$<ContentVars['ConfigVars']['scaling_method'].replace('_', ' ')>$}} (scaling reference: \textbf{\detokenize{$<ContentVars['ConfigVars']['scaling_reference']>$}}); metrics \detokenize{$<'\\textbf{are}' if ContentVars['ConfigVars']['anomalies_method']!='none' else '\\textbf{are not}'>$} based on anomalies.
+\end{itemize}
+
+\noindent As ERA5-Land is spatially and temporally complete, the results cover all land areas where the products provide valid retrievals, and changes in the number of validated locations reflect the availability of the satellite data (Chapter \ref{ssec:tracking_availability}).
+ERA5-Land is model-based and has its own errors: the metrics describe the agreement between the datasets rather than the accuracy of the products, so the \ac{C3S} accuracy requirement is not applied.
+As in the \ac{ISMN} run, the products are scaled to the reference (\ac{ubRMSD} of all products in \unitsm{}) and only common time stamps of all datasets are used.
+Results are computed on the \detokenize{$<ContentVars['NetcdfMetaVars']['val_resolution']>$}° ERA5-Land grid (nearest 0.25° product cell).
+
+\subsection{Results} \label{ssec:era5_results}
+
+\noindent The products were compared at \textbf{\detokenize{$<ContentVars['NetcdfVars']['n_gpis']>$}} ERA5-Land land grid points.
+No metrics are computed where too few valid observations remain, mostly at frozen or snow-covered soils and where the products provide no retrievals (e.g.\ dense tropical forests).
+Fig.\ \ref{fig:era5_status\runidx} shows the validation status and the number of common observations (n\_obs) per grid point.
+As ERA5-Land is gap-free, n\_obs reflects the temporal availability of the satellite data (temporal reference: \ac{C3S} SM COMBINED); it is the same for all products.
+Table \ref{tab:era5_summary} summarises Pearson's R and the \ac{ubRMSD} across all valid grid points, Fig.\ \ref{fig:era5_maps\runidx} shows their spatial patterns.
+The tracking across reports is shown in Chapter \ref{ssec:tracking_era5}; further plots are available with the validation results \href{\detokenize{$<ContentVars['NetcdfMetaVars']['url']>$}}{online}.
+
+\begin{table}[htb!]
+    \centering
+    \small
+    \caption{Agreement between the \ac{C3S} SM products and ERA5-Land across all valid grid points: number (and percentage) of grid points with valid results, median and \ac{IQR} (25th--75th percentile) of Pearson's R (only significant correlations) and the \ac{ubRMSD} (\unitsm{}).}
+    \label{tab:era5_summary}
+    \begin{tabular}{@{}lrrrrr@{}}
+        \toprule
+        & & \multicolumn{2}{c}{Pearson's R} & \multicolumn{2}{c}{ubRMSD} \\
+        \cmidrule(lr){3-4} \cmidrule(l){5-6}
+        \textbf{Product} & \textbf{Valid grid points} & \textbf{Median} & \textbf{IQR} & \textbf{Median} & \textbf{IQR} \\
+        \midrule
+        COMBINED & \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ERA5_LAND_and_1-C3S_combined']['n_ok']>$} (\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ERA5_LAND_and_1-C3S_combined']['percent_ok']>$}\,\%) & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {}).get('q50') is None else format(ReportVars['Tracking R_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {})['q50'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {}).get('q25') is None else format(ReportVars['Tracking R_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {})['q25'], '.2f') + '--' + format(ReportVars['Tracking R_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {})['q75'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {}).get('q50') is None else format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {})['q50'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {}).get('q25') is None else format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {})['q25'], '.3f') + '--' + format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_1-C3S_combined']['series'].get(ReportVars['Common']['report_name'], {})['q75'], '.3f')>$} \\
+        ACTIVE & \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ERA5_LAND_and_2-C3S_active']['n_ok']>$} (\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ERA5_LAND_and_2-C3S_active']['percent_ok']>$}\,\%) & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {}).get('q50') is None else format(ReportVars['Tracking R_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {})['q50'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {}).get('q25') is None else format(ReportVars['Tracking R_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {})['q25'], '.2f') + '--' + format(ReportVars['Tracking R_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {})['q75'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {}).get('q50') is None else format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {})['q50'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {}).get('q25') is None else format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {})['q25'], '.3f') + '--' + format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_2-C3S_active']['series'].get(ReportVars['Common']['report_name'], {})['q75'], '.3f')>$} \\
+        PASSIVE & \detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ERA5_LAND_and_3-C3S_passive']['n_ok']>$} (\detokenize{$<ContentVars['NetcdfVars']['pairs']['0-ERA5_LAND_and_3-C3S_passive']['percent_ok']>$}\,\%) & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {}).get('q50') is None else format(ReportVars['Tracking R_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {})['q50'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking R_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {}).get('q25') is None else format(ReportVars['Tracking R_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {})['q25'], '.2f') + '--' + format(ReportVars['Tracking R_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {})['q75'], '.2f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {}).get('q50') is None else format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {})['q50'], '.3f')>$} & \detokenize{$<'--' if ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {}).get('q25') is None else format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {})['q25'], '.3f') + '--' + format(ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_3-C3S_passive']['series'].get(ReportVars['Common']['report_name'], {})['q75'], '.3f')>$} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htbp!]
+\centering
+\begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \plotfig{./qa4sm_graphics/bulk_barplot_status_0-ERA5_LAND_and_1-C3S_combined.png}
+    \subcaption{} % (a)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.64\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_0-ERA5_LAND_and_1-C3S_combined_status.png}
+    \subcaption{} % (b)
+\end{minipage}
+\medskip
+\begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \plotfig{./qa4sm_graphics/bulk_boxplot_n_obs.png}
+    \subcaption{} % (c)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.64\textwidth}
+    \centering
+    \mapfig{./qa4sm_graphics/bulk_overview_n_obs.png}
+    \subcaption{} % (d)
+\end{minipage}
+\caption{Number of successfully validated grid points and errors (a) and their location (b) in the comparison of \ac{C3S} SM COMBINED against ERA5-Land (ACTIVE and PASSIVE: see Table \ref{tab:era5_summary}), and the number of common observations after temporal matching, distribution (c) and per grid point (d), the same for all products.}
+\label{fig:era5_status\runidx}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-ERA5_LAND_and_1-C3S_combined_R.png}
+    \caption{COMBINED, R}
+\end{subfigure}\hfill
+\begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-ERA5_LAND_and_1-C3S_combined_urmsd.png}
+    \caption{COMBINED, ubRMSD}
+\end{subfigure}
+\medskip
+\begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-ERA5_LAND_and_2-C3S_active_R.png}
+    \caption{ACTIVE, R}
+\end{subfigure}\hfill
+\begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-ERA5_LAND_and_2-C3S_active_urmsd.png}
+    \caption{ACTIVE, ubRMSD}
+\end{subfigure}
+\medskip
+\begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-ERA5_LAND_and_3-C3S_passive_R.png}
+    \caption{PASSIVE, R}
+\end{subfigure}\hfill
+\begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{./qa4sm_graphics/bulk_overview_0-ERA5_LAND_and_3-C3S_passive_urmsd.png}
+    \caption{PASSIVE, ubRMSD}
+\end{subfigure}
+\caption{Pearson's R (left) and \ac{ubRMSD} (right) between the \ac{C3S} SM products and ERA5-Land at all valid grid points.}
+\label{fig:era5_maps\runidx}
+\end{figure}

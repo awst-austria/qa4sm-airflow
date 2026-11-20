@@ -1,6 +1,6 @@
 \section{Datasets} \label{sec:datasets}
 
-This chapter describes the datasets and the data selection filters applied in the validation run of this report.
+This chapter describes the datasets and the data selection filters applied in the validation runs of this report.
 \\[1em]
 \noindent The validation period is from \textbf{\detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$}}.
 Only measurements within this period are used for validation.
@@ -30,7 +30,7 @@ Known limitations apply over dense vegetation, frozen or snow-covered soils (whe
 
 \noindent All filters are applied \textit{before} quality metrics are computed.
 For a detailed description of each filter, see the validation run online (link in Table \ref{tab:val_run_list}) and the \href{https://qa4sm.eu/api/user-manual}{QA4SM User Manual}.
-The following \textit{binary} filters were activated:
+The following \textit{binary} filters were activated (the same in both validation runs):
 \begin{itemize}
     \item COMBINED: \detokenize{$<', '.join([d['description'] for d in next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'C3S SM combined')['basic_filters_description']])>$}
     \item ACTIVE: \detokenize{$<', '.join([d['description'] for d in next(v for v in Run1ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'C3S SM active')['basic_filters_description']])>$}
@@ -66,3 +66,24 @@ In addition, only sensors classified as \ac{FRMs} are used, i.e.\ the subset of 
 \vspace{1em}
 
 \noindent A list of references and acknowledgements for all used \ac{ISMN} networks is given in Table \ref{tab:ismn_refs}.
+
+% ---------------------------------------------------------------------------------------------------------------------
+
+\subsection{Reference -- ERA5-Land (\detokenize{$<next(v for v in Run2ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'ERA5-Land')['version']>$})} \label{ssec:era5land}
+
+\noindent ERA5-Land is a global land surface reanalysis from 1950 to present, produced by the \ac{ECMWF} \citep{munozsabater2021}\footnote{available from the Copernicus Climate Data Store, \url{https://doi.org/10.24381/cds.e2161bac}}.
+It was produced by replaying the land component of the \ac{ECMWF} ERA5 reanalysis \citep{hersbach2020} at an increased spatial resolution of 0.1° ($\approx$9\,km), forced by the ERA5 atmospheric fields.
+Soil moisture is provided hourly and without spatial or temporal gaps for four layers; the top layer (0--7\,cm, swvl1) is used here.
+In \ac{QA4SM}, the time steps at 0, 6, 12 and 18 UTC are available and regularly updated.
+Only the final ERA5-Land data are used (no preliminary data), which are released with a delay of about two months.
+\\[1em]
+\noindent Being model-based, ERA5-Land is independent of the satellite observations, but has its own errors, e.g.\ due to errors in the precipitation forcing and the land surface model \citep{munozsabater2021}.
+It is therefore used as a complementary, spatially complete reference: the comparison shows the agreement between the datasets and detects changes in the spatial coverage and quality of the products, while the accuracy of the products is assessed against the in situ data.
+Observations at frozen soils are masked using the soil temperature of the same layer before the comparison.
+
+\subsubsection{Data filters}
+
+\noindent The following \textit{binary} filters were activated for ERA5-Land:
+\begin{itemize}
+\detokenize{$<' '.join([f"\\item {d['description']}" for d in next(v for v in Run2ContentVars['ConfigVars'].values() if isinstance(v, dict) and v.get('name') == 'ERA5-Land')['basic_filters_description']])>$}
+\end{itemize}

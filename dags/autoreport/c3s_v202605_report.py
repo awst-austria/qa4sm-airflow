@@ -11,8 +11,9 @@ are compiled into a PDF using the templates in
 c3s_v202605_quarterly/report_latex_templates/src.
 
 Runs (order of the config templates):
-    Run1: C3S COMBINED, ACTIVE, PASSIVE vs. ISMN (used in the report)
-    Run2: C3S COMBINED, ACTIVE, PASSIVE vs. ERA5-Land (tracking only)
+    Run1: C3S COMBINED, ACTIVE, PASSIVE vs. ISMN (main validation)
+    Run2: C3S COMBINED, ACTIVE, PASSIVE vs. ERA5-Land (short chapter,
+          global tracking of R / ubRMSD and spatial coverage)
 """
 from airflow.providers.standard.operators.python import (
     PythonOperator,
@@ -313,14 +314,18 @@ def _collect_and_compile(**context):
 
     products = ['1-C3S_combined', '2-C3S_active', '3-C3S_passive']
 
-    # Pearson's R / ubRMSD across all locations, expected range from the
-    # previous reports: (metric, unit, p-value variable for masking, alpha)
+    # Metrics across all locations, expected range from the previous reports:
+    # (metric, unit, p-value variable for masking, alpha)
+    # - ISMN: Pearson's R (the ubRMSD is tracked per land cover class below)
+    # - ERA5-Land: Pearson's R and ubRMSD (global, no land cover classes)
     metrics = []
-    for ref in ['0-ISMN', '0-ERA5_LAND']:
-        for p in products:
-            pair = f"{ref}_and_{p}"
-            metrics.append((f'R_between_{pair}', '-', f'p_R_between_{pair}', 0.01))
-            metrics.append((f'urmsd_between_{pair}', 'm³m⁻³', None, 0.01))
+    for p in products:
+        pair = f"0-ISMN_and_{p}"
+        metrics.append((f'R_between_{pair}', '-', f'p_R_between_{pair}', 0.01))
+    for p in products:
+        pair = f"0-ERA5_LAND_and_{p}"
+        metrics.append((f'R_between_{pair}', '-', f'p_R_between_{pair}', 0.01))
+        metrics.append((f'urmsd_between_{pair}', 'm³m⁻³', None, 0.01))
 
     report_data, tracking_status = {}, []
     for metric, unit, p_mask, alpha in metrics:
@@ -358,24 +363,32 @@ def _collect_and_compile(**context):
             report_data[f"Tracking {lc_metric}_lc_{lc}"] = data.data
             tracking_status.append(data.data['tracking']['tracking_status'])
 
-    # Number of common observations per ISMN sensor (the same for all
-    # products, one run). Detects gaps / outages in the data stream.
-    # Informative only, not part of the traffic light.
-    logger.info("[%s] Tracking number of observations (ISMN run)", report_name)
+    # Number of common observations per ERA5-Land grid point (the same for
+    # all products, one run). ERA5-Land is gap-free and C3S COMBINED is the
+    # temporal reference, so this detects gaps / outages in the satellite
+    # data stream. Informative only, not part of the traffic light.
+    logger.info("[%s] Tracking number of observations (ERA5-Land run)", report_name)
     nobs = series.track_metric(
         metric='n_obs', unit='-', pretty_name='Number of observations',
         ref_epoch=report_name, n_epochs=n_epochs,
-        run='Run1',  # ISMN run (run folder names end with RunX)
-        title='ISMN vs. all products',
+        run='Run2',  # ERA5-Land run (run folder names end with RunX)
+        title='ERA5-Land vs. all products',
         path_out=report_root / "tracking",
-        corridor_alpha=0.01, min_history=3)
+        corridor_alpha=0.01, min_history=3,
+        # only grid points with valid results (status GOOD), otherwise the
+        # many points without data (n_obs=0) dominate the distribution.
+        # Locations that drop out completely are shown by the coverage.
+        preprocess=lambda ds: ds.assign(n_obs=ds['n_obs'].where(
+            ds['status_between_0-ERA5_LAND_and_1-C3S_combined'] == 0)))
     report_data['Nobs'] = nobs.data
 
-    # Spatial coverage: number of ISMN sensors with GOOD validation status
-    # per product. Informative only, not part of the traffic light.
-    logger.info("[%s] Tracking spatial coverage", report_name)
+    # Spatial coverage: number of ERA5-Land grid points with GOOD validation
+    # status per product. ERA5-Land is gap-free, so changes reflect the
+    # satellite data (unlike ISMN, where the in situ data availability
+    # dominates). Informative only, not part of the traffic light.
+    logger.info("[%s] Tracking spatial coverage (ERA5-Land run)", report_name)
     coverage = series.track_spatial_coverage(
-        status_vars=[f'status_between_0-ISMN_and_{p}' for p in products],
+        status_vars=[f'status_between_0-ERA5_LAND_and_{p}' for p in products],
         ref_epoch=report_name, n_epochs=n_epochs,
         path_out=report_root / "tracking")
     report_data['Coverage'] = coverage.data
@@ -399,8 +412,7 @@ def _collect_and_compile(**context):
     logger.info("[%s] Compiling PDF report", report_name)
     series[report_name].compile(
         template_path=latex_templ_path,
-        # Run2 (ERA5-Land) is only used for tracking, no chapter in the report
-        run_tex=['run_ismn.tex', None],
+        run_tex=['run_ismn.tex', 'run_era5land.tex'],
         tex_ignore=None)
 
     dest = report_collection / filename

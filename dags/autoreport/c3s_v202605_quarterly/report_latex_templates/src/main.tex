@@ -111,38 +111,29 @@
     \begin{center}
     \small
     \setlength{\tabcolsep}{4pt}
-    \begin{tabular}{@{}llllcccc@{}}
+    \begin{tabular}{@{}lcccccc@{}}
     \toprule
-     & & & & & \multicolumn{3}{c}{ubRMSD (expected: $\leq$ \kpithres{}~\unitsm{})} \\
-    \cmidrule(l){6-8}
-    Reference & Run (ID/URL) & Completed & Product & R & Cropland & Grassland & Tree cover \\
+     & \multicolumn{4}{c}{Reference: \acs{ISMN}} & \multicolumn{2}{c}{Reference: ERA5-Land} \\
+    \cmidrule(lr){2-5} \cmidrule(l){6-7}
+     & & \multicolumn{3}{c}{ubRMSD ($\leq$ \kpithres{}~\unitsm{})} & & \\
+    \cmidrule(lr){3-5}
+    Product & R & Cropland & Grassland & Tree cover & R & ubRMSD \\
     \midrule
-    \acs{ISMN} &
-        \href{\detokenize{$<Run1ContentVars['NetcdfMetaVars']['url']>$}}{\detokenize{$<Run1ContentVars['remote_id'][:8]>$}\ldots}\footnotemark &
-        \detokenize{$<str(Run1ContentVars['RemoteVars']['run_end'])[:16]>$} &
-        COMBINED &
-        \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['tracking_color']>$}} \\
-     & & &
-        ACTIVE &
-        \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['tracking_color']>$}} \\
-     & & &
-        PASSIVE &
-        \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['tracking_color']>$}} &
-        \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['tracking_color']>$}} \\
+    COMBINED & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_1-C3S_combined']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_cropland']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_grassland']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_1-C3S_combined_lc_treecover']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ERA5_LAND_and_1-C3S_combined']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_1-C3S_combined']['tracking']['tracking_color']>$}} \\
+    ACTIVE & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_2-C3S_active']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_cropland']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_grassland']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_2-C3S_active_lc_treecover']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ERA5_LAND_and_2-C3S_active']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_2-C3S_active']['tracking']['tracking_color']>$}} \\
+    PASSIVE & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ISMN_and_3-C3S_passive']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_cropland']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_grassland']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ISMN_and_3-C3S_passive_lc_treecover']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking R_between_0-ERA5_LAND_and_3-C3S_passive']['tracking']['tracking_color']>$}} & \circlemark{\detokenize{$<ReportVars['Tracking urmsd_between_0-ERA5_LAND_and_3-C3S_passive']['tracking']['tracking_color']>$}} \\
+    \midrule
+    Run (ID/URL) & \multicolumn{4}{c}{\href{\detokenize{$<Run1ContentVars['NetcdfMetaVars']['url']>$}}{\detokenize{$<Run1ContentVars['remote_id'][:8]>$}\ldots}\footnotemark} & \multicolumn{2}{c}{\href{\detokenize{$<Run2ContentVars['NetcdfMetaVars']['url']>$}}{\detokenize{$<Run2ContentVars['remote_id'][:8]>$}\ldots}\footnotemark} \\
+    Completed & \multicolumn{4}{c}{\detokenize{$<str(Run1ContentVars['RemoteVars']['run_end'])[:16]>$}} & \multicolumn{2}{c}{\detokenize{$<str(Run2ContentVars['RemoteVars']['run_end'])[:16]>$}} \\
     \bottomrule
     \end{tabular}
-    \captionof{table}{Validation run against \ac{ISMN} and tracking status per product: \textcolor{green!60!black}{within}, \textcolor{red}{outside} the expected range, or \textcolor{gray}{not classified}. Details in Chapter \ref{sec:tracking} (Table \ref{tab:tracking_status}).}
+    \captionof{table}{Validation runs and tracking status per product: \textcolor{green!60!black}{within}, \textcolor{red}{outside} the expected range, or \textcolor{gray}{not classified}. Details in Chapter \ref{sec:tracking} (Table \ref{tab:tracking_status}).}
     \label{tab:val_run_list}
     \end{center}
-    \footnotetext{\raggedright Validation run ID: \detokenize{$<Run1ContentVars['remote_id']>$}, \url{\detokenize{$<Run1ContentVars['NetcdfMetaVars']['url']>$}}}
+    \addtocounter{footnote}{-1}%
+    \footnotetext{\raggedright \acs{ISMN} run: \url{\detokenize{$<Run1ContentVars['NetcdfMetaVars']['url']>$}}}%
+    \addtocounter{footnote}{1}%
+    \footnotetext{\raggedright ERA5-Land run: \url{\detokenize{$<Run2ContentVars['NetcdfMetaVars']['url']>$}}}
 
     \vspace{2mm}
     \hrule
@@ -153,7 +144,7 @@
 
     \section{Report summary} \label{sec:summary}
 
-    \noindent This report validates the \cdsall{} (v202605) surface soil moisture records for \detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$} against \ac{ISMN} in situ measurements (0--10\,cm), using a single validation run with common sensors and time stamps for all products.
+    \noindent This report validates the \cdsall{} (v202605) surface soil moisture records for \detokenize{$<ReportVars['Common']['interval_from']>$} to \detokenize{$<ReportVars['Common']['interval_to']>$} against \ac{ISMN} in situ measurements (0--10\,cm), using a single validation run with common sensors and time stamps for all products. A second run against the gap-free ERA5-Land reanalysis adds global coverage.
     Of the \detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and 'tracking' in v])>$} tracked metrics, \textbf{\detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and v.get('tracking', {}).get('tracking_status') == 'ok'])>$}} are within their expected range, \textbf{\detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and v.get('tracking', {}).get('tracking_status') == 'not ok'])>$}} are outside, and \textbf{\detokenize{$<len([v for k, v in ReportVars.items() if k.startswith('Tracking ') and v.get('tracking', {}).get('tracking_status') == 'none'])>$}} could not be classified (Table \ref{tab:val_run_list}, details in Chapter \ref{sec:tracking}).
 
     % Overall tracking indicator: vertically centered in the remaining space of page 1
@@ -178,12 +169,17 @@
     \import{./}{tracking.tex}
     \clearpage % is also floatbarrier
 
-    \section{Validation results} \label{sec:results}
+    \section{Validation against in situ data (ISMN)} \label{sec:results}
 
     This chapter contains the detailed results of the validation run between \cdsall{} and \ac{ISMN} for the period of this report, with one section per product and a comparison of the products.
     The datasets and the applied data filters are described in Chapter \ref{sec:datasets}.
 
     \import{./C3S v202605 \reportname\space Run1/}{run_ismn.tex}
+    \clearpage  % is also floatbarrier
+
+    \section{Comparison against ERA5-Land} \label{sec:era5_results}
+
+    \import{./C3S v202605 \reportname\space Run2/}{run_era5land.tex}
     \clearpage  % is also floatbarrier
     % Supplementary chapters (numbered, no appendix letters)
     \import{./}{appendix.tex}
@@ -199,11 +195,13 @@
     \acro{C3S}{Copernicus Climate Change Service}
     \acro{CCI}{Climate Change Initiative}
     \acro{CDR}{Climate Data Record}
+    \acro{ECMWF}{European Centre for Medium-Range Weather Forecasts}
     \acro{ESA}{European Space Agency}
     \acro{FRMs}{Fiducial Reference Measurements}
     \acro{GCOS}{Global Climate Observing System}
     \acro{GLDAS}{Global Land Data Assimilation System}
     \acro{ICDR}{Interim Climate Data Record}
+    \acro{IQR}{Interquartile Range}
     \acro{ISMN}{International Soil Moisture Network}
     \acro{KPI}{Key Performance Indicator}
     \acro{NRT}{Near Real Time}
